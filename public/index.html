@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calendar Table</h1>
+    <table id="calendarTable">
+        <thead>
+            <tr id="headerRow"></tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Rows will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Example data for the table rows
+            const rowData = [
+                { name: "John Doe", values: [5, 3, 8, 2, 7, 6, 4] },
+                { name: "Jane Smith", values: [4, 2, 6, 8, 5, 3, 7] },
+                { name: "Alice Johnson", values: [7, 6, 5, 8, 2, 9, 3] }
+            ];
+
+            // Get the table header and body elements
+            const headerRow = document.getElementById('headerRow');
+            const tableBody = document.getElementById('tableBody');
+
+            // Generate calendar columns
+            const today = new Date();
+            const numberOfDays = 7; // Example: 7 days of a week
+            for (let i = 0; i < numberOfDays; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const th = document.createElement('th');
+                th.textContent = `${date.getDate()}/${date.getMonth() + 1}`;
+                headerRow.appendChild(th);
+            }
+
+            // Generate table rows based on rowData
+            rowData.forEach(row => {
+                const tr = document.createElement('tr');
+                const nameTd = document.createElement('td');
+                nameTd.textContent = row.name;
+                tr.appendChild(nameTd);
+
+                row.values.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+
+                tableBody.appendChild(tr);
+            });
+        });
+    </script>
+</body>
+</html>
