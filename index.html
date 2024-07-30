@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Dynamic Table with Sub-Rows</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .sub-row {
+            background-color: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+        .sub-row td {
+            padding-left: 20px; /* Indentation for sub-rows */
+        }
+        button {
+            margin: 5px;
+        }
+        td[contenteditable="true"]:focus {
+            background-color: #eef;
+        }
+        .header-edit-container {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Editable Dynamic Table with Sub-Rows</h1>
+    <button onclick="addMainRow()">Add Main Row</button>
+    <button onclick="removeMainRow()">Remove Main Row</button>
+    <button onclick="addColumn()">Add Column</button>
+    <button onclick="removeColumn()">Remove Column</button>
+    <button onclick="editHeaders()">Edit Headers</button>
+
+    <div class="header-edit-container" id="headerEditContainer" style="display: none;">
+        <h2>Edit Headers</h2>
+        <div id="headerInputs"></div>
+        <button onclick="saveHeaderChanges()">Save Changes</button>
+    </div>
+
+    <table id="dynamicTable">
+        <thead>
+            <tr id="headerRow">
+                <th>Row/Column</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Main rows and sub-rows will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        function makeCellsEditable(row) {
+            row.querySelectorAll('td').forEach(cell => {
+                if (!cell.hasAttribute('contenteditable')) {
+                    cell.setAttribute('contenteditable', 'true');
+                    cell.addEventListener('input', () => {
+                        console.log('Cell content changed:', cell.textContent);
+                    });
+                }
+            });
+        }
+
+        function addMainRow() {
+            const tableBody = document.getElementById('tableBody');
+            const headerRow = document.getElementById('headerRow');
+            const colCount = headerRow.cells.length;
+
+            // Create the main row
+            const mainRow = document.createElement('tr');
+            const mainLabelCell = document.createElement('td');
+            mainLabelCell.textContent = `Main Row ${Math.floor(tableBody.rows.length / 6) + 1}`;
+            mainLabelCell.rowSpan = 6; // Merge cells in the first column for 1 main row + 5 sub-rows
+            mainRow.appendChild(mainLabelCell);
+
+            // Create cells for each column
+            for (let i = 1; i < colCount; i++) { // Start from 1 to skip the first column
+                const cell = document.createElement('td');
+                cell.textContent = '';
+                mainRow.appendChild(cell);
+            }
+
+            tableBody.appendChild(mainRow);
+
+            // Add 5 sub-rows
+            for (let j = 0; j < 5; j++) {
+                const subRow = document.createElement('tr');
+                subRow.classList.add('sub-row');
+                const subLabelCell = document.createElement('td');
+                subLabelCell.textContent = `Sub-row ${j + 1}`;
+                subRow.appendChild(subLabelCell);
+
+                // Create empty cells for each column
+                for (let k = 1; k < colCount; k++) { // Start from 1 to skip the first column
+                    const cell = document.createElement('td');
+                    cell.textContent = '';
+                    subRow.appendChild(cell);
+                }
+
+                tableBody.appendChild(subRow);
+            }
+
+            // Make cells editable after adding rows
+            makeCellsEditable(mainRow);
+            tableBody.querySelectorAll('.sub-row').forEach(makeCellsEditable);
+        }
+
+        function removeMainRow() {
+            const tableBody = document.getElementById('tableBody');
+            const rowCount = tableBody.rows.length;
+
+            if (rowCount >= 6) {
+                for (let i = 0; i < 6; i++) {
+                    tableBody.deleteRow(rowCount - 1);
+                }
+            }
+        }
+
+        function addColumn() {
+            const headerRow = document.getElementById('headerRow');
+            const tableBody = document.getElementById('tableBody');
+
+            // Add a new header cell
+            const th = document.createElement('th');
+            th.textContent = `Column ${headerRow.cells.length}`;
+            headerRow.appendChild(th);
+
+            // Add new cells to each row in the body
+            tableBody.querySelectorAll('tr').forEach(tr => {
+                const td = document.createElement('td');
+                td.textContent = '';
+                tr.appendChild(td);
+                makeCellsEditable(tr);
+            });
+        }
+
+        function removeColumn() {
+            const headerRow = document.getElementById('headerRow');
+            const tableBody = document.getElementById('tableBody');
+            const colCount = headerRow.cells.length;
+
+            if (colCount > 1) {
+                headerRow.deleteCell(colCount - 1);
+
+                tableBody.querySelectorAll('tr').forEach(tr => {
+                    if (tr.cells.length > 1) {
+                        tr.deleteCell(tr.cells.length - 1);
+                    }
+                });
+            }
+        }
+
+        function editHeaders() {
+            const headerRow = document.getElementById('headerRow');
+            const headerEditContainer = document.getElementById('headerEditContainer');
+            const headerInputs = document.getElementById('headerInputs');
+
+            // Clear existing inputs
+            headerInputs.innerHTML = '';
+
+            // Create input fields for each header cell
+            headerRow.querySelectorAll('th').forEach((th, index) => {
+                const inputContainer = document.createElement('div');
+                const label = document.createElement('label');
+                label.textContent = `Header ${index + 1}:`;
+                const input = document.createElement('input');
+                input.value = th.textContent;
+                input.dataset.index = index;
+                inputContainer.appendChild(label);
+                inputContainer.appendChild(input);
+                headerInputs.appendChild(inputContainer);
+            });
+
+            headerEditContainer.style.display = 'block';
+        }
+
+        function saveHeaderChanges() {
+            const headerRow = document.getElementById('headerRow');
+            const headerInputs = document.getElementById('headerInputs');
+
+            // Update header cells with new values
+            headerInputs.querySelectorAll('input').forEach(input => {
+                const index = input.dataset.index;
+                const th = headerRow.cells[index];
+                th.textContent = input.value;
+            });
+
+            // Hide the header edit container
+            document.getElementById('headerEditContainer').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
