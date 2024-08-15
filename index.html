@@ -3,202 +3,757 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Dynamic Table with Sub-Rows</title>
+    <title>Editable Dynamic Table with 365 Dates</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        .form-container h3 {
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-right: 10px;
+        }
+        .form-inline {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .form-control {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn {
+            padding: 8px 12px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            overflow-x: auto; /* Enables horizontal scroll */
+            display: block; /* Makes the table scrollable */
+        }
+        table, th, td {
+            border: 1px solid black;
         }
         th, td {
-            border: 1px solid #ddd;
             padding: 8px;
+            text-align: left;
+            white-space: nowrap; /* Prevents text from wrapping */
+        }
+        .header-cell {
+            background-color: #f0f0f0;
             text-align: center;
         }
-        th {
-            background-color: #f4f4f4;
-        }
-        .sub-row {
+        .editable {
             background-color: #f9f9f9;
-            border-top: 1px solid #ddd;
         }
-        .sub-row td {
-            padding-left: 20px; /* Indentation for sub-rows */
+        .editable:hover {
+            background-color: #e0e0e0;
         }
-        button {
-            margin: 5px;
+        .cell-container {
+            display: flex;
+            flex-direction: column;
+            height: 180px; /* Adjust height to fit 6 rows */
         }
-        td[contenteditable="true"]:focus {
-            background-color: #eef;
+        .sub-cell {
+            border: 1px solid black;
+            padding: 4px;
+            height: calc(100% / 6); /* Divide height equally for 6 rows */
+            box-sizing: border-box; /* Ensure padding is included in height */
+            overflow: hidden; /* Prevent overflow of text */
         }
-        .header-edit-container {
-            margin-bottom: 10px;
+        .delete-button {
+            color: red;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .first-column-header {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+            position: sticky; /* Keeps header visible when scrolling */
+            left: 0;
+            z-index: 1; /* Ensures it sits above other cells */
         }
     </style>
 </head>
 <body>
-    <h1>Editable Dynamic Table with Sub-Rows</h1>
-    <button onclick="addMainRow()">Add Main Row</button>
-    <button onclick="removeMainRow()">Remove Main Row</button>
-    <button onclick="addColumn()">Add Column</button>
-    <button onclick="removeColumn()">Remove Column</button>
-    <button onclick="editHeaders()">Edit Headers</button>
+<div class="container">
+    <h2>Editable Dynamic Table with 365 Dates</h2>
 
-    <div class="header-edit-container" id="headerEditContainer" style="display: none;">
-        <h2>Edit Headers</h2>
-        <div id="headerInputs"></div>
-        <button onclick="saveHeaderChanges()">Save Changes</button>
+    <!-- Form to Add Rows with Split Cells -->
+    <div class="form-container">
+        <h3>Add Row with Split Cells</h3>
+        <form id="addSplitRowForm" class="form-inline">
+            <div class="form-group">
+                <input type="text" id="siteNameSplit" class="form-control" placeholder="Site Name" required>
+            </div>
+            <button type="button" class="btn" onclick="addSplitRow()">Add Row</button>
+        </form>
     </div>
 
-    <table id="dynamicTable">
+
+<!-- Form to Add Rows without Split Cells -->
+<div class="form-container">
+    <h3>Add Row without Split Cells</h3>
+    <form id="addSingleRowForm" class="form-inline">
+        <div class="form-group">
+            <input type="text" id="siteNameSingle" class="form-control" placeholder="Site Name" required>
+        </div>
+        <button type="button" class="btn" onclick="addSingleRow()">Add Row</button>
+    </form>
+</div>
+
+
+
+    <!-- Form to Insert Row at a Specific Position -->
+    <div class="form-container">
+        <h3>Insert Row at Position</h3>
+        <form id="insertRowForm" class="form-inline">
+            <div class="form-group">
+                <input type="number" id="rowIndex" class="form-control" placeholder="Row Index" min="1" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="siteNameInsert" class="form-control" placeholder="Site Name" required>
+            </div>
+            <button type="button" class="btn" onclick="insertRow()">Insert Row</button>
+        </form>
+    </div>
+
+    
+    <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row Based on Column Headers and containing word available/empty -->
+<div class="form-container">
+    <h3>Replace selected sites or random  </h3>
+    <form id="autoFillRangeForm" class="form-inline">
+        <div class="form-group">
+            <input type="text" id="rowHeader" class="form-control" placeholder="Row Header" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="startColumnHeader" class="form-control" placeholder="Start Column Header" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="endColumnHeader" class="form-control" placeholder="End Column Header" required>
+        </div>
+        
+        <div class="form-group">
+            <input type="text" id="autoFillValue" class="form-control" placeholder="Value" required>
+        </div>
+        <div class="form-group">
+            <input type="color" id="autoFillColor" class="form-control" value="#ffffff">
+        </div>
+        <div class="form-group">
+            <label for="numRows">Number of Rows to Process:</label>
+            <input type="text" id="numRows" name="numRows">
+        </div>
+        
+        <button type="button" onclick="autoFillRangeRandom()">Random Fill </button>
+
+        <button type="button" class="btn" onclick="autoFillRange()">Fill selected</button>
+
+        <button type="button" class="btn" onclick="searchInRangeReplace()">Replace All</button>
+    </form>
+</div>
+<!-- Form to Search for Cell Values within a Range -->
+<div class="form-container">
+    <h3>Search for anything within a specific date</h3>
+    <form id="searchInRangeForm" class="form-inline">
+        <div class="form-group">
+            <input type="text" id="searchStartColumnHeader" class="form-control" placeholder="Start Column Header" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="searchEndColumnHeader" class="form-control" placeholder="End Column Header" required>
+        </div>
+        
+        <button type="button" class="btn" onclick="searchInRange()">Search</button>
+    </form>
+</div>
+    
+    <!-- Form to Search for row or cells-->
+    <div class="form-container">
+        <h3>Search for anything</h3>
+        <form id="searchForm" class="form-inline">
+            <div class="form-group">
+                <input type="text" id="searchHeader" class="form-control" placeholder="Search Header" required>
+            </div>
+            <button type="button" class="btn" onclick="searchTable()">Search</button>
+        </form>
+    </div>
+
+    <!-- Table Structure -->
+    <table id="dataTable">
         <thead>
             <tr id="headerRow">
-                <th>Row/Column</th>
+                <th class="header-cell first-column-header">Site Name</th>
+                <!-- Date headers will be added here -->
             </tr>
         </thead>
-        <tbody id="tableBody">
-            <!-- Main rows and sub-rows will be added here -->
+        <tbody>
+            <!-- Rows will be added here -->
         </tbody>
     </table>
+</div>
 
-    <script>
-        function makeCellsEditable(row) {
-            row.querySelectorAll('td').forEach(cell => {
-                if (!cell.hasAttribute('contenteditable')) {
-                    cell.setAttribute('contenteditable', 'true');
-                    cell.addEventListener('input', () => {
-                        console.log('Cell content changed:', cell.textContent);
+<script>
+    function generateDateHeaders() {
+    const headerRow = document.getElementById('headerRow');
+    const startDate = new Date('2024-07-01'); // Start date: July 1, 2024
+    const numOfDays = 365; // Number of days to generate
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < numOfDays; i++) {
+        // Compute the date starting from startDate
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i); // Increment the date by i days
+
+        // Format the date to DD/MM/YYYY
+        const dateStr = date.toLocaleDateString('en-GB'); 
+        
+        // Date Header Cell
+        const dateTh = document.createElement('th');
+        dateTh.className = 'header-cell';
+        dateTh.textContent = dateStr;
+        fragment.appendChild(dateTh);
+    }
+
+    headerRow.appendChild(fragment);
+}
+
+function addSplitRow() {
+    const siteName = document.getElementById('siteNameSplit').value;
+    if (!siteName) {
+        alert("Please enter a Site Name.");
+        return;
+    }
+
+    const tableBody = document.querySelector("#dataTable tbody");
+    const newRow = document.createElement("tr");
+    const siteNameCell = document.createElement("td");
+    siteNameCell.textContent = siteName;
+    siteNameCell.className = 'editable first-column-header';
+    siteNameCell.setAttribute('contenteditable', 'true');
+    newRow.appendChild(siteNameCell);
+
+    const numOfDays = 365;
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let headerCellIndex = 1; // Start after the Site Name column
+
+    for (let i = 0; i < numOfDays; i++) {
+        const cellContainer = document.createElement('div');
+        cellContainer.className = 'cell-container';
+
+        // Create 6 sub-cells per column with "Available" and background color
+        for (let j = 0; j < 6; j++) {
+            const subCell = document.createElement('div');
+            subCell.className = 'sub-cell editable';
+            subCell.setAttribute('contenteditable', 'true');
+            subCell.textContent = "Available"; // Set the text content to "Available"
+            subCell.style.backgroundColor = "rgb(0, 240, 0)"; // Set the background color
+            cellContainer.appendChild(subCell);
+        }
+
+        const cell = document.createElement("td");
+        cell.appendChild(cellContainer);
+        newRow.appendChild(cell);
+
+        headerCellIndex++;
+    }
+
+    const deleteCell = document.createElement("td");
+    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
+    newRow.appendChild(deleteCell);
+
+    tableBody.appendChild(newRow);
+    document.getElementById("siteNameSplit").value = "";
+}
+
+
+
+
+function addSingleRow() {
+    const siteName = document.getElementById('siteNameSingle').value;
+    if (!siteName) {
+        alert("Please enter a Site Name.");
+        return;
+    }
+
+    const tableBody = document.querySelector("#dataTable tbody");
+    const newRow = document.createElement("tr");
+    
+    // Create and add the site name cell
+    const siteNameCell = document.createElement("td");
+    siteNameCell.textContent = siteName;
+    siteNameCell.className = 'editable first-column-header';
+    siteNameCell.setAttribute('contenteditable', 'true');
+    newRow.appendChild(siteNameCell);
+
+    const numOfDays = 365;
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let headerCellIndex = 1; // Start after the Site Name column
+
+    for (let i = 0; i < numOfDays; i++) {
+        const cell = document.createElement("td");
+        cell.className = 'editable';
+        cell.setAttribute('contenteditable', 'true');
+        cell.textContent = siteName; // Set the same value for all cells
+
+        newRow.appendChild(cell);
+        headerCellIndex++;
+    }
+
+    // Create and add the delete button cell
+    const deleteCell = document.createElement("td");
+    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
+    newRow.appendChild(deleteCell);
+
+    // Add a unique class to identify rows created by addSingleRow
+    newRow.classList.add("single-row");
+
+    // Add the new row to the table
+    tableBody.appendChild(newRow);
+
+    // Clear the input field
+    document.getElementById("siteNameSingle").value = "";
+}
+
+function insertRow() {
+    const siteName = document.getElementById('siteNameInsert').value;
+    const rowIndex = parseInt(document.getElementById('rowIndex').value, 10);
+    
+    if (!siteName) {
+        alert("Please enter a Site Name.");
+        return;
+    }
+
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    if (rowIndex < 1 || rowIndex > rows.length + 1) {
+        alert("Index exceeds number of rows.");
+        return;
+    }
+
+    const tableBody = document.querySelector("#dataTable tbody");
+    const newRow = document.createElement("tr");
+    const siteNameCell = document.createElement("td");
+    siteNameCell.textContent = siteName;
+    siteNameCell.className = 'editable first-column-header';
+    siteNameCell.setAttribute('contenteditable', 'true');
+    newRow.appendChild(siteNameCell);
+
+    const numOfDays = 365;
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < numOfDays; i++) {
+        const cellContainer = document.createElement('div');
+        cellContainer.className = 'cell-container';
+
+        for (let j = 0; j < 6; j++) {
+            const subCell = document.createElement('div');
+            subCell.className = 'sub-cell editable';
+            subCell.setAttribute('contenteditable', 'true');
+            subCell.textContent = "Available"; // Set the text content
+            subCell.style.backgroundColor = 'rgb(0, 240, 0)'; // Set the background color
+            cellContainer.appendChild(subCell);
+        }
+
+        const cell = document.createElement("td");
+        cell.appendChild(cellContainer);
+        fragment.appendChild(cell);
+    }
+
+    newRow.appendChild(fragment);
+
+    const deleteCell = document.createElement("td");
+    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
+    newRow.appendChild(deleteCell);
+
+    tableBody.insertBefore(newRow, rows[rowIndex - 1] || null);
+    document.getElementById("rowIndex").value = "";
+    document.getElementById("siteNameInsert").value = "";
+}
+
+function deleteRow(button) {
+    const row = button.closest("tr");
+    row.remove();
+}
+function autoFillRangeRandom() {
+    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
+    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
+    const value = document.getElementById('autoFillValue').value || "";
+    const color = document.getElementById('autoFillColor').value || "#ffffff";
+    const numRowsToProcess = parseInt(document.getElementById('numRows').value, 10) || 0;
+
+    if (!startColumnHeader || !endColumnHeader) {
+        alert("Please enter all required values.");
+        return;
+    }
+
+    // Find column indexes based on column headers
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
+
+    headerCells.forEach((headerCell, index) => {
+        const headerText = headerCell.textContent.trim();
+        if (headerText === startColumnHeader) {
+            startColumnIndex = index;
+        }
+        if (headerText === endColumnHeader) {
+            endColumnIndex = index;
+        }
+    });
+
+    if (startColumnIndex === -1 || endColumnIndex === -1) {
+        alert("Column headers not found.");
+        return;
+    }
+
+    // Process rows
+    const rows = Array.from(document.querySelectorAll("#dataTable tbody tr"));
+    let numProcessed = 0;
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        const row = rows[rowIndex];
+        const cells = row.querySelectorAll("td");
+
+        // Determine the index of the sub-cell to fill
+        let fillSubCellIndex = -1;
+        let hasAvailable = false;
+
+        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+            if (i < cells.length) {
+                const cell = cells[i];
+                const subCells = cell.querySelectorAll('.sub-cell');
+
+                for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
+                    const subCell = subCells[subIndex];
+                    const cellText = subCell.textContent.trim();
+                    
+                    // Check if any sub-cell is "Available"
+                    if (cellText === "Available") {
+                        hasAvailable = true;
+                    }
+
+                    // Find the first valid index where the sub-cell is empty or contains "Available"
+                    if (cellText === "" || cellText === "Available") {
+                        fillSubCellIndex = subIndex;
+                        break; // Found a valid sub-cell index
+                    }
+                }
+
+                // Break if we've found the valid index
+                if (fillSubCellIndex !== -1) {
+                    break;
+                }
+            }
+        }
+
+        // Only update rows with "Available" in the specified columns
+        if (hasAvailable && fillSubCellIndex !== -1) {
+            cells.forEach((cell, index) => {
+                if (index >= startColumnIndex && index <= endColumnIndex) {
+                    const subCells = cell.querySelectorAll('.sub-cell');
+                    if (fillSubCellIndex < subCells.length) {
+                        const subCell = subCells[fillSubCellIndex];
+                        const cellText = subCell.textContent.trim();
+                        
+                        // Only update the sub-cell if it's empty or contains "Available"
+                        if (cellText === "" || cellText === "Available") {
+                            subCell.textContent = value;
+                            subCell.style.backgroundColor = color;
+                        }
+                    }
+                }
+            });
+
+            numProcessed++;
+            if (numProcessed >= numRowsToProcess) {
+                break; // Stop processing if we've reached the desired number of rows
+            }
+        }
+    }
+
+    // Alert if the number of processed rows is less than the specified number
+    if (numProcessed < numRowsToProcess) {
+        alert("Alert - not enough sites");
+    }
+}
+
+
+function autoFillRange() {
+    const rowHeader = document.getElementById('rowHeader').value.trim();
+    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
+    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
+    const value = document.getElementById('autoFillValue').value || "";
+    const color = document.getElementById('autoFillColor').value || "#ffffff";
+
+    if (!rowHeader || !startColumnHeader || !endColumnHeader) {
+        alert("Please enter all required values.");
+        return;
+    }
+
+    // Find the target row based on rowHeader
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    let targetRow = null;
+
+    rows.forEach(row => {
+        // Skip rows with the class 'single-row'
+        if (row.classList.contains('single-row')) {
+            return;
+        }
+
+        const cells = row.querySelectorAll("td");
+        const rowHeaderCell = cells[0];
+        if (rowHeaderCell.textContent.trim() === rowHeader) {
+            targetRow = row;
+        }
+    });
+
+    if (!targetRow) {
+        alert("Row header not found.");
+        return;
+    }
+
+    // Find column indexes based on column headers
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
+
+    headerCells.forEach((headerCell, index) => {
+        const headerText = headerCell.textContent.trim();
+        if (headerText === startColumnHeader) {
+            startColumnIndex = index;
+        }
+        if (headerText === endColumnHeader) {
+            endColumnIndex = index;
+        }
+    });
+
+    if (startColumnIndex === -1 || endColumnIndex === -1) {
+        alert("Column headers not found.");
+        return;
+    }
+
+    // Determine the index of the sub-cell to fill
+    let fillSubCellIndex = -1;
+    const cells = targetRow.querySelectorAll("td");
+
+    for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+        if (i < cells.length) {
+            const cell = cells[i];
+            const subCells = cell.querySelectorAll('.sub-cell');
+
+            for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
+                const subCell = subCells[subIndex];
+                const cellText = subCell.textContent.trim();
+                
+                // Find the first valid index where the sub-cell is empty or contains "Available"
+                if (cellText === "" || cellText === "Available") {
+                    fillSubCellIndex = subIndex;
+                    break; // Found a valid sub-cell index
+                }
+            }
+
+            // Break if we've found the valid index
+            if (fillSubCellIndex !== -1) {
+                break;
+            }
+        }
+    }
+
+    // If a valid sub-cell index was found, fill the specified range
+    if (fillSubCellIndex !== -1) {
+        cells.forEach((cell, index) => {
+            if (index >= startColumnIndex && index <= endColumnIndex) {
+                const subCells = cell.querySelectorAll('.sub-cell');
+                if (fillSubCellIndex < subCells.length) {
+                    const subCell = subCells[fillSubCellIndex];
+                    const cellText = subCell.textContent.trim();
+                    
+                    // Only update the sub-cell if it's empty or contains "Available"
+                    if (cellText === "" || cellText === "Available") {
+                        subCell.textContent = value;
+                        subCell.style.backgroundColor = color;
+                    }
+                }
+            }
+        });
+    }
+}
+
+
+    function searchTable() {
+        const searchHeader = document.getElementById('searchHeader').value.toLowerCase();
+        const rows = document.querySelectorAll("#dataTable tbody tr");
+
+        rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowHeaderCell = cells[0].textContent.toLowerCase();
+
+        let showRow = false;
+
+        // Check if row header contains the search term
+        if (rowHeaderCell.includes(searchHeader)) {
+            showRow = true;
+        } else {
+            // Check the content of all cells if row header does not match
+            cells.forEach(cell => {
+                const subCells = cell.querySelectorAll('.sub-cell');
+                let cellContainsValue = false;
+
+                // Check sub-cells if present
+                if (subCells.length > 0) {
+                    subCells.forEach(subCell => {
+                        if (subCell.textContent.toLowerCase().includes(searchHeader)) {
+                            cellContainsValue = true;
+                        }
                     });
+                } else {
+                    // Check cell content if no sub-cells
+                    if (cell.textContent.toLowerCase().includes(searchHeader)) {
+                        cellContainsValue = true;
+                    }
+                }
+
+                if (cellContainsValue) {
+                    showRow = true;
                 }
             });
         }
 
-        function addMainRow() {
-            const tableBody = document.getElementById('tableBody');
-            const headerRow = document.getElementById('headerRow');
-            const colCount = headerRow.cells.length;
+        row.style.display = showRow ? "" : "none";
+       });
+    }
 
-            // Create the main row
-            const mainRow = document.createElement('tr');
-            const mainLabelCell = document.createElement('td');
-            mainLabelCell.textContent = `Main Row ${Math.floor(tableBody.rows.length / 6) + 1}`;
-            mainLabelCell.rowSpan = 6; // Merge cells in the first column for 1 main row + 5 sub-rows
-            mainRow.appendChild(mainLabelCell);
+    function searchInRangeReplace() {
+    // Get input values
+    const startColumnHeader = document.getElementById('startColumnHeader');
+    const endColumnHeader = document.getElementById('endColumnHeader');
+    const newValue = document.getElementById('autoFillValue');
+    const newColor = document.getElementById('autoFillColor');
 
-            // Create cells for each column
-            for (let i = 1; i < colCount; i++) { // Start from 1 to skip the first column
-                const cell = document.createElement('td');
-                cell.textContent = '';
-                mainRow.appendChild(cell);
-            }
+    // Validate if elements exist
+    if (!startColumnHeader || !endColumnHeader || !newValue) {
+        console.error("Required input elements are missing.");
+        return;
+    }
 
-            tableBody.appendChild(mainRow);
+    const startColumnHeaderValue = startColumnHeader.value.trim();
+    const endColumnHeaderValue = endColumnHeader.value.trim();
+    const newValueText = newValue.value.trim();
+    const newColorValue = newColor ? newColor.value.trim() : "#ffffff";
 
-            // Add 5 sub-rows
-            for (let j = 0; j < 5; j++) {
-                const subRow = document.createElement('tr');
-                subRow.classList.add('sub-row');
-                const subLabelCell = document.createElement('td');
-                subLabelCell.textContent = `Sub-row ${j + 1}`;
-                subRow.appendChild(subLabelCell);
+    // Validate input values
+    if (!startColumnHeaderValue || !endColumnHeaderValue) {
+        alert("Please enter both start and end column headers.");
+        return;
+    }
+    if (!newValueText) {
+        alert("Please enter a new value.");
+        return;
+    }
 
-                // Create empty cells for each column
-                for (let k = 1; k < colCount; k++) { // Start from 1 to skip the first column
-                    const cell = document.createElement('td');
-                    cell.textContent = '';
-                    subRow.appendChild(cell);
-                }
+    // Find column indexes based on column headers
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
 
-                tableBody.appendChild(subRow);
-            }
-
-            // Make cells editable after adding rows
-            makeCellsEditable(mainRow);
-            tableBody.querySelectorAll('.sub-row').forEach(makeCellsEditable);
+    headerCells.forEach((headerCell, index) => {
+        const headerText = headerCell.textContent.trim();
+        if (headerText === startColumnHeaderValue) {
+            startColumnIndex = index;
         }
-
-        function removeMainRow() {
-            const tableBody = document.getElementById('tableBody');
-            const rowCount = tableBody.rows.length;
-
-            if (rowCount >= 6) {
-                for (let i = 0; i < 6; i++) {
-                    tableBody.deleteRow(rowCount - 1);
-                }
-            }
+        if (headerText === endColumnHeaderValue) {
+            endColumnIndex = index;
         }
+    });
 
-        function addColumn() {
-            const headerRow = document.getElementById('headerRow');
-            const tableBody = document.getElementById('tableBody');
+    if (startColumnIndex === -1 || endColumnIndex === -1) {
+        alert("Start or end column header not found.");
+        return;
+    }
 
-            // Add a new header cell
-            const th = document.createElement('th');
-            th.textContent = `Column ${headerRow.cells.length}`;
-            headerRow.appendChild(th);
+    // Process each row
+    const rows = document.querySelectorAll("#dataTable tbody tr");
 
-            // Add new cells to each row in the body
-            tableBody.querySelectorAll('tr').forEach(tr => {
-                const td = document.createElement('td');
-                td.textContent = '';
-                tr.appendChild(td);
-                makeCellsEditable(tr);
-            });
-        }
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
 
-        function removeColumn() {
-            const headerRow = document.getElementById('headerRow');
-            const tableBody = document.getElementById('tableBody');
-            const colCount = headerRow.cells.length;
+        // Array to store the indices of "Available" sub-cells
+        let availableIndices = [];
 
-            if (colCount > 1) {
-                headerRow.deleteCell(colCount - 1);
+        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+            if (i < cells.length) {
+                const cell = cells[i];
+                const subCells = cell.querySelectorAll('.sub-cell');
 
-                tableBody.querySelectorAll('tr').forEach(tr => {
-                    if (tr.cells.length > 1) {
-                        tr.deleteCell(tr.cells.length - 1);
+                // Find index of "Available" in sub-cells of this cell
+                let foundIndex = -1;
+                subCells.forEach((subCell, index) => {
+                    if (subCell.textContent.trim() === "Available") {
+                        if (foundIndex === -1) {
+                            foundIndex = index; // Set index of the first "Available" found
+                        }
                     }
                 });
+
+                // If the index was found in this cell, add it to availableIndices
+                if (foundIndex !== -1) {
+                    availableIndices.push(foundIndex);
+                } else {
+                    // If any column does not have "Available" at the same index, break
+                    availableIndices = [];
+                    break;
+                }
             }
         }
 
-        function editHeaders() {
-            const headerRow = document.getElementById('headerRow');
-            const headerEditContainer = document.getElementById('headerEditContainer');
-            const headerInputs = document.getElementById('headerInputs');
+        // Replace values if all columns within the range had "Available" at the same index
+        if (availableIndices.length === (endColumnIndex - startColumnIndex + 1)) {
+            const replaceIndex = availableIndices[0]; // Use the first index where "Available" was found
 
-            // Clear existing inputs
-            headerInputs.innerHTML = '';
+            for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+                if (i < cells.length) {
+                    const cell = cells[i];
+                    const subCells = cell.querySelectorAll('.sub-cell');
 
-            // Create input fields for each header cell
-            headerRow.querySelectorAll('th').forEach((th, index) => {
-                const inputContainer = document.createElement('div');
-                const label = document.createElement('label');
-                label.textContent = `Header ${index + 1}:`;
-                const input = document.createElement('input');
-                input.value = th.textContent;
-                input.dataset.index = index;
-                inputContainer.appendChild(label);
-                inputContainer.appendChild(input);
-                headerInputs.appendChild(inputContainer);
-            });
-
-            headerEditContainer.style.display = 'block';
+                    // Ensure that the replaceIndex is within the range of subCells
+                    if (replaceIndex < subCells.length) {
+                        const subCell = subCells[replaceIndex];
+                        subCell.textContent = newValueText;
+                        if (newColorValue) {
+                            subCell.style.backgroundColor = newColorValue;
+                        }
+                    }
+                }
+            }
         }
+    });
+}
 
-        function saveHeaderChanges() {
-            const headerRow = document.getElementById('headerRow');
-            const headerInputs = document.getElementById('headerInputs');
-
-            // Update header cells with new values
-            headerInputs.querySelectorAll('input').forEach(input => {
-                const index = input.dataset.index;
-                const th = headerRow.cells[index];
-                th.textContent = input.value;
-            });
-
-            // Hide the header edit container
-            document.getElementById('headerEditContainer').style.display = 'none';
-        }
-    </script>
+    // Generate the initial headers when the page loads
+    document.addEventListener("DOMContentLoaded", generateDateHeaders);
+</script>
 </body>
 </html>
