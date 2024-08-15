@@ -4,71 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editable Dynamic Table with 365 Dates</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
         .container {
-            width: 90%;
-            margin: 0 auto;
+            width: 95%;
+            margin: 20px auto;
         }
         h2 {
             text-align: center;
             margin-bottom: 20px;
         }
         .form-container {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         .form-container h3 {
-            margin-bottom: 10px;
-        }
-        .form-group {
-            margin-right: 10px;
-        }
-        .form-inline {
-            display: flex;
-            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
         .form-control {
-            padding: 8px;
             margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
-        .btn {
-            padding: 8px 12px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #0056b3;
+        .btn-primary {
+            margin-right: 10px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             overflow-x: auto; /* Enables horizontal scroll */
             display: block; /* Makes the table scrollable */
+            background-color: #ffffff;
+            border-radius: 0.375rem; /* Rounded corners for table */
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* Subtle shadow for depth */
         }
         table, th, td {
-            border: 1px solid black;
+            border: 1px solid #dee2e6;
         }
         th, td {
-            padding: 8px;
+            padding: 12px;
             text-align: left;
             white-space: nowrap; /* Prevents text from wrapping */
         }
         .header-cell {
-            background-color: #f0f0f0;
+            background-color: #e9ecef;
             text-align: center;
+            font-weight: bold;
         }
         .editable {
-            background-color: #f9f9f9;
+            background-color: #ffffff;
+            cursor: pointer;
         }
         .editable:hover {
-            background-color: #e0e0e0;
+            background-color: #f1f3f5;
         }
         .cell-container {
             display: flex;
@@ -76,22 +66,25 @@
             height: 180px; /* Adjust height to fit 6 rows */
         }
         .sub-cell {
-            border: 1px solid black;
+            border: 1px solid #dee2e6;
             padding: 4px;
             height: calc(100% / 6); /* Divide height equally for 6 rows */
             box-sizing: border-box; /* Ensure padding is included in height */
             overflow: hidden; /* Prevent overflow of text */
         }
         .delete-button {
-            color: red;
+            color: #dc3545;
             cursor: pointer;
-            background-color: #f0f0f0;
+            background-color: #ffffff;
             border: none;
             padding: 5px 10px;
             font-size: 14px;
         }
+        .delete-button:hover {
+            color: #c82333;
+        }
         .first-column-header {
-            background-color: #e0e0e0;
+            background-color: #f8f9fa;
             font-weight: bold;
             text-align: center;
             position: sticky; /* Keeps header visible when scrolling */
@@ -107,93 +100,89 @@
     <!-- Form to Add Rows with Split Cells -->
     <div class="form-container">
         <h3>Add Row with Split Cells</h3>
-        <form id="addSplitRowForm" class="form-inline">
-            <div class="form-group">
+        <form id="addSplitRowForm" class="d-flex flex-wrap">
+            <div class="form-group mb-2">
                 <input type="text" id="siteNameSplit" class="form-control" placeholder="Site Name" required>
             </div>
-            <button type="button" class="btn" onclick="addSplitRow()">Add Row</button>
+            <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Row</button>
         </form>
     </div>
 
-
-<!-- Form to Add Rows without Split Cells -->
-<div class="form-container">
-    <h3>Add Row without Split Cells</h3>
-    <form id="addSingleRowForm" class="form-inline">
-        <div class="form-group">
-            <input type="text" id="siteNameSingle" class="form-control" placeholder="Site Name" required>
-        </div>
-        <button type="button" class="btn" onclick="addSingleRow()">Add Row</button>
-    </form>
-</div>
-
-
+    <!-- Form to Add Rows without Split Cells -->
+    <div class="form-container">
+        <h3>Add Row without Split Cells</h3>
+        <form id="addSingleRowForm" class="d-flex flex-wrap">
+            <div class="form-group mb-2">
+                <input type="text" id="siteNameSingle" class="form-control" placeholder="Site Name" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addSingleRow()">Add Row</button>
+        </form>
+    </div>
 
     <!-- Form to Insert Row at a Specific Position -->
     <div class="form-container">
         <h3>Insert Row at Position</h3>
-        <form id="insertRowForm" class="form-inline">
-            <div class="form-group">
+        <form id="insertRowForm" class="d-flex flex-wrap">
+            <div class="form-group mb-2">
                 <input type="number" id="rowIndex" class="form-control" placeholder="Row Index" min="1" required>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <input type="text" id="siteNameInsert" class="form-control" placeholder="Site Name" required>
             </div>
-            <button type="button" class="btn" onclick="insertRow()">Insert Row</button>
+            <button type="button" class="btn btn-primary" onclick="insertRow()">Insert Row</button>
         </form>
     </div>
 
-    
-    <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row Based on Column Headers and containing word available/empty -->
+    <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row -->
     <div class="form-container">
-        <h3>Replace selected sites or random</h3>
-        <form id="autoFillRangeForm" class="form-inline">
-            <div class="form-group">
-                <label for="rowHeader">Row Header:</label>
+        <h3>Replace Selected Sites or Random</h3>
+        <form id="autoFillRangeForm" class="d-flex flex-wrap">
+            <div class="form-group mb-2">
+                <label for="rowHeader" class="form-label">Row Header:</label>
                 <input type="text" id="rowHeader" class="form-control" placeholder="Enter Row Header" required>
             </div>
-            <div class="form-group">
-                <label for="startColumnHeader">Start Column Header:</label>
+            <div class="form-group mb-2">
+                <label for="startColumnHeader" class="form-label">Start Column Header:</label>
                 <select id="startColumnHeader" class="form-control">
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
-            <div class="form-group">
-                <label for="endColumnHeader">End Column Header:</label>
+            <div class="form-group mb-2">
+                <label for="endColumnHeader" class="form-label">End Column Header:</label>
                 <select id="endColumnHeader" class="form-control">
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <input type="text" id="autoFillValue" class="form-control" placeholder="Value" required>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <input type="color" id="autoFillColor" class="form-control" value="#ffffff">
             </div>
-            <div class="form-group">
-                <label for="numRows">Number of Rows to Process:</label>
-                <input type="text" id="numRows" name="numRows">
+            <div class="form-group mb-2">
+                <label for="numRows" class="form-label">Number of Rows to Process:</label>
+                <input type="text" id="numRows" name="numRows" class="form-control">
             </div>
-            <button type="button" onclick="autoFillRangeRandom()">Random Fill</button>
-            <button type="button" class="btn" onclick="autoFillRange()">Fill selected</button>
-            <button type="button" class="btn" onclick="searchInRangeReplace()">Replace All</button>
-            <button type="button" class="btn" onclick="searchInRange()">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="autoFillRangeRandom()">Random Fill</button>
+            <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill Selected</button>
+            <button type="button" class="btn btn-danger" onclick="searchInRangeReplace()">Replace All</button>
+            <button type="button" class="btn btn-info" onclick="searchInRange()">Search</button>
         </form>
     </div>
-    
-    <!-- Form to Search for row or cells-->
+
+    <!-- Form to Search for Rows or Cells -->
     <div class="form-container">
-        <h3>Search for anything</h3>
-        <form id="searchForm" class="form-inline">
-            <div class="form-group">
+        <h3>Search for Anything</h3>
+        <form id="searchForm" class="d-flex flex-wrap">
+            <div class="form-group mb-2">
                 <input type="text" id="searchHeader" class="form-control" placeholder="Search Header" required>
             </div>
-            <button type="button" class="btn" onclick="searchTable()">Search</button>
+            <button type="button" class="btn btn-primary" onclick="searchTable()">Search</button>
         </form>
     </div>
 
     <!-- Table Structure -->
-    <table id="dataTable">
+    <table id="dataTable" class="table table-bordered">
         <thead>
             <tr id="headerRow">
                 <th class="header-cell first-column-header">Site Name</th>
@@ -205,6 +194,9 @@
         </tbody>
     </table>
 </div>
+
+<!-- Bootstrap JavaScript Bundle with Popper -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
 
 <script>
     function generateDateHeaders() {
