@@ -145,51 +145,41 @@
 
     
     <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row Based on Column Headers and containing word available/empty -->
-<div class="form-container">
-    <h3>Replace selected sites or random  </h3>
-    <form id="autoFillRangeForm" class="form-inline">
-        <div class="form-group">
-            <input type="text" id="rowHeader" class="form-control" placeholder="Row Header" required>
-        </div>
-        <div class="form-group">
-            <input type="text" id="startColumnHeader" class="form-control" placeholder="Start Column Header" required>
-        </div>
-        <div class="form-group">
-            <input type="text" id="endColumnHeader" class="form-control" placeholder="End Column Header" required>
-        </div>
-        
-        <div class="form-group">
-            <input type="text" id="autoFillValue" class="form-control" placeholder="Value" required>
-        </div>
-        <div class="form-group">
-            <input type="color" id="autoFillColor" class="form-control" value="#ffffff">
-        </div>
-        <div class="form-group">
-            <label for="numRows">Number of Rows to Process:</label>
-            <input type="text" id="numRows" name="numRows">
-        </div>
-        
-        <button type="button" onclick="autoFillRangeRandom()">Random Fill </button>
-
-        <button type="button" class="btn" onclick="autoFillRange()">Fill selected</button>
-
-        <button type="button" class="btn" onclick="searchInRangeReplace()">Replace All</button>
-    </form>
-</div>
-<!-- Form to Search for Cell Values within a Range -->
-<div class="form-container">
-    <h3>Search for anything within a specific date</h3>
-    <form id="searchInRangeForm" class="form-inline">
-        <div class="form-group">
-            <input type="text" id="searchStartColumnHeader" class="form-control" placeholder="Start Column Header" required>
-        </div>
-        <div class="form-group">
-            <input type="text" id="searchEndColumnHeader" class="form-control" placeholder="End Column Header" required>
-        </div>
-        
-        <button type="button" class="btn" onclick="searchInRange()">Search</button>
-    </form>
-</div>
+    <div class="form-container">
+        <h3>Replace selected sites or random</h3>
+        <form id="autoFillRangeForm" class="form-inline">
+            <div class="form-group">
+                <label for="rowHeader">Row Header:</label>
+                <input type="text" id="rowHeader" class="form-control" placeholder="Enter Row Header" required>
+            </div>
+            <div class="form-group">
+                <label for="startColumnHeader">Start Column Header:</label>
+                <select id="startColumnHeader" class="form-control">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="endColumnHeader">End Column Header:</label>
+                <select id="endColumnHeader" class="form-control">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" id="autoFillValue" class="form-control" placeholder="Value" required>
+            </div>
+            <div class="form-group">
+                <input type="color" id="autoFillColor" class="form-control" value="#ffffff">
+            </div>
+            <div class="form-group">
+                <label for="numRows">Number of Rows to Process:</label>
+                <input type="text" id="numRows" name="numRows">
+            </div>
+            <button type="button" onclick="autoFillRangeRandom()">Random Fill</button>
+            <button type="button" class="btn" onclick="autoFillRange()">Fill selected</button>
+            <button type="button" class="btn" onclick="searchInRangeReplace()">Replace All</button>
+            <button type="button" class="btn" onclick="searchInRange()">Search</button>
+        </form>
+    </div>
     
     <!-- Form to Search for row or cells-->
     <div class="form-container">
@@ -223,6 +213,9 @@
     const numOfDays = 365; // Number of days to generate
     const fragment = document.createDocumentFragment();
 
+    // Create an array to store column headers
+    const columnHeaders = [];
+
     for (let i = 0; i < numOfDays; i++) {
         // Compute the date starting from startDate
         const date = new Date(startDate);
@@ -236,10 +229,42 @@
         dateTh.className = 'header-cell';
         dateTh.textContent = dateStr;
         fragment.appendChild(dateTh);
+
+        // Store column headers
+        columnHeaders.push(dateStr);
     }
 
     headerRow.appendChild(fragment);
+
+    // Populate the dropdowns for start and end column headers
+    const startColumnSelect = document.getElementById('startColumnHeader');
+    const endColumnSelect = document.getElementById('endColumnHeader');
+
+    columnHeaders.forEach(header => {
+        const option = document.createElement('option');
+        option.value = header;
+        option.textContent = header;
+        startColumnSelect.appendChild(option);
+        endColumnSelect.appendChild(option.cloneNode(true)); // Clone the option for the end column select
+    });
+
+    // Populate the dropdown for row headers
+    const rowHeaderSelect = document.getElementById('rowHeader');
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowHeader = cells[0].textContent.trim();
+        if (rowHeader) {
+            const option = document.createElement('option');
+            option.value = rowHeader;
+            option.textContent = rowHeader;
+            rowHeaderSelect.appendChild(option);
+        }
+    });
 }
+
+// Call generateDateHeaders on page load
+document.addEventListener("DOMContentLoaded", generateDateHeaders);
 
 function addSplitRow() {
     const siteName = document.getElementById('siteNameSplit').value;
@@ -432,6 +457,7 @@ function autoFillRangeRandom() {
     // Process rows
     const rows = Array.from(document.querySelectorAll("#dataTable tbody tr"));
     let numProcessed = 0;
+    let processedAny = false; // Track if we processed any row
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         const row = rows[rowIndex];
@@ -488,6 +514,8 @@ function autoFillRangeRandom() {
             });
 
             numProcessed++;
+            processedAny = true; // Mark that at least one row has been processed
+
             if (numProcessed >= numRowsToProcess) {
                 break; // Stop processing if we've reached the desired number of rows
             }
@@ -495,11 +523,10 @@ function autoFillRangeRandom() {
     }
 
     // Alert if the number of processed rows is less than the specified number
-    if (numProcessed < numRowsToProcess) {
+    if (processedAny && numProcessed < numRowsToProcess) {
         alert("Alert - not enough sites");
     }
 }
-
 
 function autoFillRange() {
     const rowHeader = document.getElementById('rowHeader').value.trim();
@@ -601,8 +628,6 @@ function autoFillRange() {
         });
     }
 }
-
-
     function searchTable() {
         const searchHeader = document.getElementById('searchHeader').value.toLowerCase();
         const rows = document.querySelectorAll("#dataTable tbody tr");
@@ -645,6 +670,67 @@ function autoFillRange() {
         row.style.display = showRow ? "" : "none";
        });
     }
+    function searchInRange() {
+    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
+    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
+    const searchValue = "Available"; // Constant search value
+
+    if (!startColumnHeader || !endColumnHeader) {
+        alert("Please enter all required column headers.");
+        return;
+    }
+
+    // Find column indexes based on column headers
+    const headerCells = document.querySelectorAll("#headerRow th");
+    let startColumnIndex = -1;
+    let endColumnIndex = -1;
+
+    headerCells.forEach((headerCell, index) => {
+        const headerText = headerCell.textContent.trim();
+        if (headerText === startColumnHeader) {
+            startColumnIndex = index;
+        }
+        if (headerText === endColumnHeader) {
+            endColumnIndex = index;
+        }
+    });
+
+    if (startColumnIndex === -1 || endColumnIndex === -1) {
+        alert("Column headers not found.");
+        return;
+    }
+
+    // Search for rows where all cells in the specified range contain the search value
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        let allMatch = true;
+
+        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+            if (i < cells.length) {
+                const cell = cells[i];
+                const subCells = cell.querySelectorAll('.sub-cell');
+
+                // Check if all sub-cells contain the constant search value
+                let cellContainsValue = false;
+                subCells.forEach(subCell => {
+                    if (subCell.textContent.trim() === searchValue) {
+                        cellContainsValue = true;
+                    }
+                });
+
+                if (!cellContainsValue) {
+                    allMatch = false;
+                    break;
+                }
+            }
+        }
+
+        // Show or hide rows based on whether all cells in the range contain the value
+        row.style.display = allMatch ? "" : "none";
+    });
+}
 
     function searchInRangeReplace() {
     // Get input values
