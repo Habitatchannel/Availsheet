@@ -31,6 +31,17 @@
         .btn-primary {
             margin-right: 10px;
         }
+        .form-group select[multiple] {
+    width: 100%; /* Adjust to fit your layout */
+    height: 150px; /* Adjust to control the visible area */
+    overflow-y: auto; /* Add vertical scrollbar */
+    box-sizing: border-box; /* Include padding and border in the width and height */
+}
+
+/* Optional: Improve option readability */
+.form-group select[multiple] option {
+    padding: 5px; /* Add padding for better readability */
+}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -82,6 +93,28 @@
         }
         .delete-button:hover {
             color: #c82333;
+        }
+        .notification {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none; /* Hide by default */
+            z-index: 1000; /* Ensure it appears above other content */
+        }
+        .notification.show {
+            display: block;
+            animation: fadeInOut 3s;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
         }
         .first-column-header {
             background-color: #f8f9fa;
@@ -139,7 +172,9 @@
         <form id="autoFillRangeForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
                 <label for="rowHeader" class="form-label">Row Header:</label>
-                <input type="text" id="rowHeader" class="form-control" placeholder="Enter Row Header" required>
+                <select id="rowHeader" class="form-control" multiple>
+                    <!-- Options will be populated dynamically -->
+                </select>
             </div>
             <div class="form-group mb-2">
                 <label for="startColumnHeader" class="form-label">Start Column Header:</label>
@@ -180,6 +215,12 @@
             <button type="button" class="btn btn-primary" onclick="searchTable()">Search</button>
         </form>
     </div>
+    <div class="form-container">
+        <button type="button" class="btn btn-success" onclick="saveTableState()">Save Table</button>
+        <button type="button" class="btn btn-warning" onclick="loadTableState()">Load Table</button>
+    </div>
+     <!-- Notification Element -->
+     <div id="notification" class="notification">Auto Save</div>
 
     <!-- Table Structure -->
     <table id="dataTable" class="table table-bordered">
@@ -199,6 +240,34 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    function saveTableState() {
+    const tableHTML = document.querySelector('#dataTable').outerHTML;
+    localStorage.setItem('tableState', tableHTML);
+    // Show the custom notification
+    const notification = document.getElementById('notification');
+            notification.classList.add('show');
+
+            // Hide the notification after 1 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+}
+// Call saveTableState every 10 seconds (10000 milliseconds)
+setInterval(saveTableState, 10000);
+
+function loadTableState() {
+    const savedTableHTML = localStorage.getItem('tableState');
+    if (savedTableHTML) {
+        const dataTable = document.querySelector('#dataTable');
+        dataTable.outerHTML = savedTableHTML;
+        updateDynamicOptions(); // To re-populate any dynamic options
+        alert('Table loaing please wait .');
+    } else {
+        alert('No table found.');
+    }
+}
+// Load the table state on page load
+window.onload = loadTableState;
     function generateDateHeaders() {
     const headerRow = document.getElementById('headerRow');
     const startDate = new Date('2024-07-01'); // Start date: July 1, 2024
@@ -265,6 +334,13 @@ function addSplitRow() {
         return;
     }
 
+    // Add the new siteName to the multiselect dropdown
+    const rowHeaderSelect = document.getElementById('rowHeader');
+    const option = document.createElement('option');
+    option.value = siteName;
+    option.textContent = siteName;
+    rowHeaderSelect.appendChild(option);
+
     const tableBody = document.querySelector("#dataTable tbody");
     const newRow = document.createElement("tr");
     const siteNameCell = document.createElement("td");
@@ -305,8 +381,6 @@ function addSplitRow() {
     tableBody.appendChild(newRow);
     document.getElementById("siteNameSplit").value = "";
 }
-
-
 
 
 function addSingleRow() {
@@ -414,11 +488,12 @@ function deleteRow(button) {
     const row = button.closest("tr");
     row.remove();
 }
+
 function autoFillRangeRandom() {
     const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
     const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
-    const value = document.getElementById('autoFillValue').value || "";
-    const color = document.getElementById('autoFillColor').value || "#ffffff";
+    const value = document.getElementById('autoFillValue').value.trim() || "";
+    const color = document.getElementById('autoFillColor').value.trim() || "#ffffff";
     const numRowsToProcess = parseInt(document.getElementById('numRows').value, 10) || 0;
 
     if (!startColumnHeader || !endColumnHeader) {
@@ -446,6 +521,34 @@ function autoFillRangeRandom() {
         return;
     }
 
+    // Function to find a consistent sub-cell index across all columns in the range
+    function findConsistentSubCellIndex(cells, startIndex, endIndex) {
+        let fillSubCellIndex = -1;
+        for (let i = startIndex; i <= endIndex; i++) {
+            if (i >= cells.length) continue;
+            const cell = cells[i];
+            const subCells = cell.querySelectorAll('.sub-cell');
+
+            if (subCells.length === 0) return -1; // No sub-cells to consider
+
+            for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
+                const subCell = subCells[subIndex];
+                const cellText = subCell.textContent.trim();
+                
+                // Find the first valid index where the sub-cell is empty or contains "Available"
+                if (cellText === "" || cellText === "Available") {
+                    if (fillSubCellIndex === -1) {
+                        fillSubCellIndex = subIndex; // Set index if it's the first valid index found
+                    } else if (subIndex !== fillSubCellIndex) {
+                        return -1; // Inconsistent sub-cell index
+                    }
+                    break; // Found a valid sub-cell index
+                }
+            }
+        }
+        return fillSubCellIndex;
+    }
+
     // Process rows
     const rows = Array.from(document.querySelectorAll("#dataTable tbody tr"));
     let numProcessed = 0;
@@ -455,49 +558,40 @@ function autoFillRangeRandom() {
         const row = rows[rowIndex];
         const cells = row.querySelectorAll("td");
 
-        // Determine the index of the sub-cell to fill
-        let fillSubCellIndex = -1;
-        let hasAvailable = false;
+        // Determine the consistent sub-cell index
+        const consistentSubCellIndex = findConsistentSubCellIndex(cells, startColumnIndex, endColumnIndex);
 
+        if (consistentSubCellIndex === -1) {
+            continue; // Skip rows if no consistent sub-cell index is found
+        }
+
+        // Check if all sub-cells in the specified columns are "Available"
+        let allSubCellsAvailable = true;
         for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-            if (i < cells.length) {
-                const cell = cells[i];
-                const subCells = cell.querySelectorAll('.sub-cell');
+            if (i >= cells.length) continue;
+            const cell = cells[i];
+            const subCells = cell.querySelectorAll('.sub-cell');
 
-                for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
-                    const subCell = subCells[subIndex];
-                    const cellText = subCell.textContent.trim();
-                    
-                    // Check if any sub-cell is "Available"
-                    if (cellText === "Available") {
-                        hasAvailable = true;
-                    }
+            if (consistentSubCellIndex >= subCells.length) {
+                allSubCellsAvailable = false;
+                break; // Skip if sub-cell index is out of range for any column
+            }
 
-                    // Find the first valid index where the sub-cell is empty or contains "Available"
-                    if (cellText === "" || cellText === "Available") {
-                        fillSubCellIndex = subIndex;
-                        break; // Found a valid sub-cell index
-                    }
-                }
-
-                // Break if we've found the valid index
-                if (fillSubCellIndex !== -1) {
-                    break;
-                }
+            const subCell = subCells[consistentSubCellIndex];
+            if (subCell.textContent.trim() !== "Available") {
+                allSubCellsAvailable = false;
+                break; // Skip if any sub-cell in the range is not "Available"
             }
         }
 
-        // Only update rows with "Available" in the specified columns
-        if (hasAvailable && fillSubCellIndex !== -1) {
+        // Only update rows if all sub-cells in the specified columns are "Available"
+        if (allSubCellsAvailable) {
             cells.forEach((cell, index) => {
                 if (index >= startColumnIndex && index <= endColumnIndex) {
                     const subCells = cell.querySelectorAll('.sub-cell');
-                    if (fillSubCellIndex < subCells.length) {
-                        const subCell = subCells[fillSubCellIndex];
-                        const cellText = subCell.textContent.trim();
-                        
-                        // Only update the sub-cell if it's empty or contains "Available"
-                        if (cellText === "" || cellText === "Available") {
+                    if (consistentSubCellIndex < subCells.length) {
+                        const subCell = subCells[consistentSubCellIndex];
+                        if (subCell.textContent.trim() === "" || subCell.textContent.trim() === "Available") {
                             subCell.textContent = value;
                             subCell.style.backgroundColor = color;
                         }
@@ -521,36 +615,15 @@ function autoFillRangeRandom() {
 }
 
 function autoFillRange() {
-    const rowHeader = document.getElementById('rowHeader').value.trim();
+    const rowHeaders = Array.from(document.getElementById('rowHeader').selectedOptions)
+                            .map(option => option.value.trim());
     const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
     const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
     const value = document.getElementById('autoFillValue').value || "";
     const color = document.getElementById('autoFillColor').value || "#ffffff";
 
-    if (!rowHeader || !startColumnHeader || !endColumnHeader) {
-        alert("Please enter all required values.");
-        return;
-    }
-
-    // Find the target row based on rowHeader
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-    let targetRow = null;
-
-    rows.forEach(row => {
-        // Skip rows with the class 'single-row'
-        if (row.classList.contains('single-row')) {
-            return;
-        }
-
-        const cells = row.querySelectorAll("td");
-        const rowHeaderCell = cells[0];
-        if (rowHeaderCell.textContent.trim() === rowHeader) {
-            targetRow = row;
-        }
-    });
-
-    if (!targetRow) {
-        alert("Row header not found.");
+    if (rowHeaders.length === 0 || !startColumnHeader || !endColumnHeader) {
+        alert("Please select at least one row header and enter all required values.");
         return;
     }
 
@@ -574,52 +647,121 @@ function autoFillRange() {
         return;
     }
 
-    // Determine the index of the sub-cell to fill
-    let fillSubCellIndex = -1;
-    const cells = targetRow.querySelectorAll("td");
+    // Process each selected rowHeader
+    rowHeaders.forEach(rowHeader => {
+        // Find the target row based on rowHeader
+        const rows = document.querySelectorAll("#dataTable tbody tr");
+        let targetRow = null;
 
-    for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-        if (i < cells.length) {
-            const cell = cells[i];
-            const subCells = cell.querySelectorAll('.sub-cell');
-
-            for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
-                const subCell = subCells[subIndex];
-                const cellText = subCell.textContent.trim();
-                
-                // Find the first valid index where the sub-cell is empty or contains "Available"
-                if (cellText === "" || cellText === "Available") {
-                    fillSubCellIndex = subIndex;
-                    break; // Found a valid sub-cell index
-                }
+        rows.forEach(row => {
+            // Skip rows with the class 'single-row'
+            if (row.classList.contains('single-row')) {
+                return;
             }
 
-            // Break if we've found the valid index
-            if (fillSubCellIndex !== -1) {
-                break;
-            }
-        }
-    }
-
-    // If a valid sub-cell index was found, fill the specified range
-    if (fillSubCellIndex !== -1) {
-        cells.forEach((cell, index) => {
-            if (index >= startColumnIndex && index <= endColumnIndex) {
-                const subCells = cell.querySelectorAll('.sub-cell');
-                if (fillSubCellIndex < subCells.length) {
-                    const subCell = subCells[fillSubCellIndex];
-                    const cellText = subCell.textContent.trim();
-                    
-                    // Only update the sub-cell if it's empty or contains "Available"
-                    if (cellText === "" || cellText === "Available") {
-                        subCell.textContent = value;
-                        subCell.style.backgroundColor = color;
-                    }
-                }
+            const cells = row.querySelectorAll("td");
+            const rowHeaderCell = cells[0];
+            if (rowHeaderCell.textContent.trim() === rowHeader) {
+                targetRow = row;
             }
         });
-    }
+
+        if (!targetRow) {
+            alert(`Row header "${rowHeader}" not found.`);
+            return;
+        }
+
+        // Determine the consistent sub-cell index across all specified columns
+        let fillSubCellIndex = -1;
+        const cells = targetRow.querySelectorAll("td");
+
+        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+            if (i < cells.length) {
+                const cell = cells[i];
+                const subCells = cell.querySelectorAll('.sub-cell');
+
+                if (subCells.length === 0) {
+                    fillSubCellIndex = -1;
+                    break; // No sub-cells in this column, cannot determine index
+                }
+
+                let columnSubCellIndex = -1;
+
+                for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
+                    const subCell = subCells[subIndex];
+                    const cellText = subCell.textContent.trim();
+
+                    // Find the first valid index where the sub-cell is empty or contains "Available"
+                    if (cellText === "" || cellText === "Available") {
+                        columnSubCellIndex = subIndex;
+                        break; // Found a valid sub-cell index
+                    }
+                }
+
+                if (columnSubCellIndex === -1) {
+                    fillSubCellIndex = -1;
+                    break; // No valid sub-cell index found
+                }
+
+                if (fillSubCellIndex === -1) {
+                    fillSubCellIndex = columnSubCellIndex; // Set index if it's the first valid index found
+                } else if (fillSubCellIndex !== columnSubCellIndex) {
+                    fillSubCellIndex = -1;
+                    break; // Inconsistent sub-cell index
+                }
+            }
+        }
+
+        // If a consistent sub-cell index was found, check if all sub-cells in the specified range are "Available"
+        if (fillSubCellIndex !== -1) {
+            let allAvailable = true;
+
+            for (let i = startColumnIndex; i <= endColumnIndex; i++) {
+                if (i >= cells.length) continue;
+                const cell = cells[i];
+                const subCells = cell.querySelectorAll('.sub-cell');
+
+                if (fillSubCellIndex >= subCells.length) {
+                    allAvailable = false;
+                    break; // Sub-cell index is out of range for this column
+                }
+
+                const subCell = subCells[fillSubCellIndex];
+                if (subCell.textContent.trim() !== "Available") {
+                    allAvailable = false;
+                    break; // At least one sub-cell is not "Available"
+                }
+            }
+
+            // Only update cells if all sub-cells at the same index are "Available"
+            if (allAvailable) {
+                cells.forEach((cell, index) => {
+                    if (index >= startColumnIndex && index <= endColumnIndex) {
+                        const subCells = cell.querySelectorAll('.sub-cell');
+                        if (fillSubCellIndex < subCells.length) {
+                            const subCell = subCells[fillSubCellIndex];
+                            if (subCell.textContent.trim() === "" || subCell.textContent.trim() === "Available") {
+                                subCell.textContent = value;
+                                subCell.style.backgroundColor = color;
+                            }
+                        }
+                    }
+                });
+            } else {
+                alert(`Not all sub-cells in the specified range for row header "${rowHeader}" have the value 'Available'.`);
+            }
+        } else {
+            alert(`No consistent sub-cell index found across the specified range for row header "${rowHeader}".`);
+        }
+    });
 }
+
+function getSelectedRowHeaders() {
+    const rowHeaderSelect = document.getElementById('rowHeader');
+    const selectedOptions = Array.from(rowHeaderSelect.selectedOptions);
+    return selectedOptions.map(option => option.value);
+}
+
     function searchTable() {
         const searchHeader = document.getElementById('searchHeader').value.toLowerCase();
         const rows = document.querySelectorAll("#dataTable tbody tr");
@@ -662,6 +804,7 @@ function autoFillRange() {
         row.style.display = showRow ? "" : "none";
        });
     }
+
     function searchInRange() {
     const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
     const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
@@ -832,6 +975,7 @@ function autoFillRange() {
 
     // Generate the initial headers when the page loads
     document.addEventListener("DOMContentLoaded", generateDateHeaders);
+    
 </script>
 </body>
 </html>
