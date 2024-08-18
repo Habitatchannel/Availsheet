@@ -159,7 +159,7 @@
             <div class="form-group mb-2">
                 <input type="number" id="rowIndexSplit" class="form-control" placeholder="Enter Row number to Insert the site " min="1">
             </div>
-            <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Row</button>
+            <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Site</button>
         </form>
     </div>
 
@@ -170,7 +170,7 @@
             <div class="form-group mb-2">
                 <input type="text" id="siteNameSingle" class="form-control" placeholder="State Name" required>
             </div>
-            <button type="button" class="btn btn-primary" onclick="addSingleRow()">Add Row</button>
+            <button type="button" class="btn btn-primary" onclick="addSingleRow()">Add State</button>
         </form>
     </div>
 
@@ -183,6 +183,11 @@
                 <select id="rowHeader" class="form-control" multiple>
                     <!-- Options will be populated dynamically -->
                 </select>
+            </div>
+            <div>
+                <!-- Add this button to your HTML -->
+                <button id="deleteHeaderButton" onclick="deleteRowHeader()">Delete Site name from list </button>
+
             </div>
             <div class="form-group mb-2">
                 <label for="startColumnHeader" class="form-label">Campaign Start Date:</label>
@@ -240,7 +245,7 @@
     <div class="form-container">
         <h3>Save / Load Table</h3>
         <button type="button" class="btn btn-success" onclick="saveTableState()">Save Table</button>
-        <button type="button" class="btn btn-warning" onclick="loadTableState()">Load Table</button>
+        <button type="button" class="btn btn-warning" onclick="loadTableState()">Undo</button>
     </div>
      <!-- Notification Element -->
      <div id="notification" class="notification">Table Saved !</div>
