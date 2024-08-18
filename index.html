@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Dynamic Table with 365 Dates</title>
+    <title>Avails Sheet</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -128,14 +128,36 @@
 </head>
 <body>
 <div class="container">
-    <h2>Editable Dynamic Table with 365 Dates</h2>
+    <h2>Avails Sheet</h2>
 
     <!-- Form to Add Rows with Split Cells -->
     <div class="form-container">
-        <h3>Add Row with Split Cells</h3>
+        <h3>Add New Site</h3>
         <form id="addSplitRowForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
-                <input type="text" id="siteNameSplit" class="form-control" placeholder="Site Name" required>
+                <label for="siteNameSplit" class="form-label">Enter Site Name</label>
+                <input type="text" id="siteNameSplit" class="form-control" placeholder="New Site Name" required>
+            </div>
+            <div class="form-group mb-2">
+                <label for="startColumnHeader" class="form-label">Choose State</label>
+                <select id="rowTags" class="form-control">
+                   <option value="">Select State</option>
+                   <option value="NSW">NSW</option>
+                   <option value="ACT">ACT</option>
+                   <option value="QLD">QLD</option>
+                   <option value="VIC">VIC</option>
+                   <option value="SA">SA</option>
+                   <option value="WA">WA</option>
+                   <option value="NT">NT</option>
+                     <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-check mt-2">
+                <input type="checkbox" class="form-check-input" id="addLandscapeTag">
+                <label class="form-check-label" for="addLandscapeTag">Landscape</label>
+            </div>
+            <div class="form-group mb-2">
+                <input type="number" id="rowIndexSplit" class="form-control" placeholder="Enter Row number to Insert the site " min="1">
             </div>
             <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Row</button>
         </form>
@@ -143,91 +165,99 @@
 
     <!-- Form to Add Rows without Split Cells -->
     <div class="form-container">
-        <h3>Add Row without Split Cells</h3>
+        <h3>Add New State</h3>
         <form id="addSingleRowForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
-                <input type="text" id="siteNameSingle" class="form-control" placeholder="Site Name" required>
+                <input type="text" id="siteNameSingle" class="form-control" placeholder="State Name" required>
             </div>
             <button type="button" class="btn btn-primary" onclick="addSingleRow()">Add Row</button>
         </form>
     </div>
 
-    <!-- Form to Insert Row at a Specific Position -->
-    <div class="form-container">
-        <h3>Insert Row at Position</h3>
-        <form id="insertRowForm" class="d-flex flex-wrap">
-            <div class="form-group mb-2">
-                <input type="number" id="rowIndex" class="form-control" placeholder="Row Index" min="1" required>
-            </div>
-            <div class="form-group mb-2">
-                <input type="text" id="siteNameInsert" class="form-control" placeholder="Site Name" required>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="insertRow()">Insert Row</button>
-        </form>
-    </div>
-
     <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row -->
     <div class="form-container">
-        <h3>Replace Selected Sites or Random</h3>
+        <h3>Fill Campaigns on Avails </h3>
         <form id="autoFillRangeForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
-                <label for="rowHeader" class="form-label">Row Header:</label>
+                <label for="rowHeader" class="form-label">Site Name:</label>
                 <select id="rowHeader" class="form-control" multiple>
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
             <div class="form-group mb-2">
-                <label for="startColumnHeader" class="form-label">Start Column Header:</label>
+                <label for="startColumnHeader" class="form-label">Campaign Start Date:</label>
                 <select id="startColumnHeader" class="form-control">
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
             <div class="form-group mb-2">
-                <label for="endColumnHeader" class="form-label">End Column Header:</label>
+                <label for="endColumnHeader" class="form-label">Campaign End Date:</label>
                 <select id="endColumnHeader" class="form-control">
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
             <div class="form-group mb-2">
-                <input type="text" id="autoFillValue" class="form-control" placeholder="Value" required>
+                <label for="autoFillValue" class="form-label">Campaign Name: </label>
+                <input type="text" id="autoFillValue" class="form-control" placeholder="Campaign Name" required>
             </div>
             <div class="form-group mb-2">
-                <input type="color" id="autoFillColor" class="form-control" value="#ffffff">
+               <label for="autoFillColor" class="form-label">Select Colour </label>
+                <input type="color" id="autoFillColor" class="form-control" placeholder="Slect colour" required>
             </div>
             <div class="form-group mb-2">
-                <label for="numRows" class="form-label">Number of Rows to Process:</label>
+                <label for="numRows" class="form-label">Number of Sites</label>
                 <input type="text" id="numRows" name="numRows" class="form-control">
             </div>
-            <button type="button" class="btn btn-secondary" onclick="autoFillRangeRandom()">Random Fill</button>
-            <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill Selected</button>
-            <button type="button" class="btn btn-danger" onclick="searchInRangeReplace()">Replace All</button>
+            <div>
+                <label for="tagReferenceSelect">Select state (optional):</label>
+                <select id="tagReferenceSelect">
+                    <option value="">-- Select State--</option>
+                    <option value="NSW">NSW</option>
+                    <option value="VIC">VIC</option>
+                    <option value="QLD">QLD</option>
+                    <option value="ACT">ACT</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="autoFillRangeRandom()">Fill Random</button>
+            <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill choosen Site</button>
+            <button type="button" class="btn btn-danger" onclick="searchInRangeReplace()">Replace All sites</button>
             <button type="button" class="btn btn-info" onclick="searchInRange()">Search</button>
         </form>
     </div>
 
+
     <!-- Form to Search for Rows or Cells -->
     <div class="form-container">
-        <h3>Search for Anything</h3>
+        <h3>Search </h3>
         <form id="searchForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
-                <input type="text" id="searchHeader" class="form-control" placeholder="Search Header" required>
+                <input type="text" id="searchHeader" class="form-control" placeholder="Campaign,Landscape,Site, etc.." required>
             </div>
             <button type="button" class="btn btn-primary" onclick="searchTable()">Search</button>
         </form>
     </div>
     <div class="form-container">
+        <h3>Save / Load Table</h3>
         <button type="button" class="btn btn-success" onclick="saveTableState()">Save Table</button>
         <button type="button" class="btn btn-warning" onclick="loadTableState()">Load Table</button>
     </div>
      <!-- Notification Element -->
-     <div id="notification" class="notification">Auto Save</div>
-
+     <div id="notification" class="notification">Table Saved !</div>
+     <div class="form-container">
+        <h3>Export / Import Table Data</h3>
+        <button type="button" class="btn btn-success" onclick="exportTableToExcel()">Export as Excel</button>
+    </div>
     <!-- Table Structure -->
     <table id="dataTable" class="table table-bordered">
         <thead>
             <tr id="headerRow">
+                <th class="header-cell">Sno</th> <!-- Added Serial Number Header -->
+                <th class="header-cell ">Tags</th> 
                 <th class="header-cell first-column-header">Site Name</th>
+
                 <!-- Date headers will be added here -->
+                 
             </tr>
         </thead>
         <tbody>
@@ -236,746 +266,11 @@
     </table>
 </div>
 
+
+
 <!-- Bootstrap JavaScript Bundle with Popper -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    function saveTableState() {
-    const tableHTML = document.querySelector('#dataTable').outerHTML;
-    localStorage.setItem('tableState', tableHTML);
-    // Show the custom notification
-    const notification = document.getElementById('notification');
-            notification.classList.add('show');
-
-            // Hide the notification after 1 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 2000);
-}
-// Call saveTableState every 10 seconds (10000 milliseconds)
-setInterval(saveTableState, 10000);
-
-function loadTableState() {
-    const savedTableHTML = localStorage.getItem('tableState');
-    if (savedTableHTML) {
-        const dataTable = document.querySelector('#dataTable');
-        dataTable.outerHTML = savedTableHTML;
-        updateDynamicOptions(); // To re-populate any dynamic options
-        alert('Table loaing please wait .');
-    } else {
-        alert('No table found.');
-    }
-}
-// Load the table state on page load
-window.onload = loadTableState;
-    function generateDateHeaders() {
-    const headerRow = document.getElementById('headerRow');
-    const startDate = new Date('2024-07-01'); // Start date: July 1, 2024
-    const numOfDays = 365; // Number of days to generate
-    const fragment = document.createDocumentFragment();
-
-    // Create an array to store column headers
-    const columnHeaders = [];
-
-    for (let i = 0; i < numOfDays; i++) {
-        // Compute the date starting from startDate
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + i); // Increment the date by i days
-
-        // Format the date to DD/MM/YYYY
-        const dateStr = date.toLocaleDateString('en-GB'); 
-        
-        // Date Header Cell
-        const dateTh = document.createElement('th');
-        dateTh.className = 'header-cell';
-        dateTh.textContent = dateStr;
-        fragment.appendChild(dateTh);
-
-        // Store column headers
-        columnHeaders.push(dateStr);
-    }
-
-    headerRow.appendChild(fragment);
-
-    // Populate the dropdowns for start and end column headers
-    const startColumnSelect = document.getElementById('startColumnHeader');
-    const endColumnSelect = document.getElementById('endColumnHeader');
-
-    columnHeaders.forEach(header => {
-        const option = document.createElement('option');
-        option.value = header;
-        option.textContent = header;
-        startColumnSelect.appendChild(option);
-        endColumnSelect.appendChild(option.cloneNode(true)); // Clone the option for the end column select
-    });
-
-    // Populate the dropdown for row headers
-    const rowHeaderSelect = document.getElementById('rowHeader');
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        const rowHeader = cells[0].textContent.trim();
-        if (rowHeader) {
-            const option = document.createElement('option');
-            option.value = rowHeader;
-            option.textContent = rowHeader;
-            rowHeaderSelect.appendChild(option);
-        }
-    });
-}
-
-// Call generateDateHeaders on page load
-document.addEventListener("DOMContentLoaded", generateDateHeaders);
-
-function addSplitRow() {
-    const siteName = document.getElementById('siteNameSplit').value;
-    if (!siteName) {
-        alert("Please enter a Site Name.");
-        return;
-    }
-
-    // Add the new siteName to the multiselect dropdown
-    const rowHeaderSelect = document.getElementById('rowHeader');
-    const option = document.createElement('option');
-    option.value = siteName;
-    option.textContent = siteName;
-    rowHeaderSelect.appendChild(option);
-
-    const tableBody = document.querySelector("#dataTable tbody");
-    const newRow = document.createElement("tr");
-    const siteNameCell = document.createElement("td");
-    siteNameCell.textContent = siteName;
-    siteNameCell.className = 'editable first-column-header';
-    siteNameCell.setAttribute('contenteditable', 'true');
-    newRow.appendChild(siteNameCell);
-
-    const numOfDays = 365;
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let headerCellIndex = 1; // Start after the Site Name column
-
-    for (let i = 0; i < numOfDays; i++) {
-        const cellContainer = document.createElement('div');
-        cellContainer.className = 'cell-container';
-
-        // Create 6 sub-cells per column with "Available" and background color
-        for (let j = 0; j < 6; j++) {
-            const subCell = document.createElement('div');
-            subCell.className = 'sub-cell editable';
-            subCell.setAttribute('contenteditable', 'true');
-            subCell.textContent = "Available"; // Set the text content to "Available"
-            subCell.style.backgroundColor = "rgb(0, 240, 0)"; // Set the background color
-            cellContainer.appendChild(subCell);
-        }
-
-        const cell = document.createElement("td");
-        cell.appendChild(cellContainer);
-        newRow.appendChild(cell);
-
-        headerCellIndex++;
-    }
-
-    const deleteCell = document.createElement("td");
-    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
-    newRow.appendChild(deleteCell);
-
-    tableBody.appendChild(newRow);
-    document.getElementById("siteNameSplit").value = "";
-}
-
-
-function addSingleRow() {
-    const siteName = document.getElementById('siteNameSingle').value;
-    if (!siteName) {
-        alert("Please enter a Site Name.");
-        return;
-    }
-
-    const tableBody = document.querySelector("#dataTable tbody");
-    const newRow = document.createElement("tr");
-    
-    // Create and add the site name cell
-    const siteNameCell = document.createElement("td");
-    siteNameCell.textContent = siteName;
-    siteNameCell.className = 'editable first-column-header';
-    siteNameCell.setAttribute('contenteditable', 'true');
-    newRow.appendChild(siteNameCell);
-
-    const numOfDays = 365;
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let headerCellIndex = 1; // Start after the Site Name column
-
-    for (let i = 0; i < numOfDays; i++) {
-        const cell = document.createElement("td");
-        cell.className = 'editable';
-        cell.setAttribute('contenteditable', 'true');
-        cell.textContent = siteName; // Set the same value for all cells
-
-        newRow.appendChild(cell);
-        headerCellIndex++;
-    }
-
-    // Create and add the delete button cell
-    const deleteCell = document.createElement("td");
-    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
-    newRow.appendChild(deleteCell);
-
-    // Add a unique class to identify rows created by addSingleRow
-    newRow.classList.add("single-row");
-
-    // Add the new row to the table
-    tableBody.appendChild(newRow);
-
-    // Clear the input field
-    document.getElementById("siteNameSingle").value = "";
-}
-
-function insertRow() {
-    const siteName = document.getElementById('siteNameInsert').value;
-    const rowIndex = parseInt(document.getElementById('rowIndex').value, 10);
-    
-    if (!siteName) {
-        alert("Please enter a Site Name.");
-        return;
-    }
-
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-    if (rowIndex < 1 || rowIndex > rows.length + 1) {
-        alert("Index exceeds number of rows.");
-        return;
-    }
-
-    const tableBody = document.querySelector("#dataTable tbody");
-    const newRow = document.createElement("tr");
-    const siteNameCell = document.createElement("td");
-    siteNameCell.textContent = siteName;
-    siteNameCell.className = 'editable first-column-header';
-    siteNameCell.setAttribute('contenteditable', 'true');
-    newRow.appendChild(siteNameCell);
-
-    const numOfDays = 365;
-    const fragment = document.createDocumentFragment();
-
-    for (let i = 0; i < numOfDays; i++) {
-        const cellContainer = document.createElement('div');
-        cellContainer.className = 'cell-container';
-
-        for (let j = 0; j < 6; j++) {
-            const subCell = document.createElement('div');
-            subCell.className = 'sub-cell editable';
-            subCell.setAttribute('contenteditable', 'true');
-            subCell.textContent = "Available"; // Set the text content
-            subCell.style.backgroundColor = 'rgb(0, 240, 0)'; // Set the background color
-            cellContainer.appendChild(subCell);
-        }
-
-        const cell = document.createElement("td");
-        cell.appendChild(cellContainer);
-        fragment.appendChild(cell);
-    }
-
-    newRow.appendChild(fragment);
-
-    const deleteCell = document.createElement("td");
-    deleteCell.innerHTML = '<button class="delete-button" onclick="deleteRow(this)">Delete</button>';
-    newRow.appendChild(deleteCell);
-
-    tableBody.insertBefore(newRow, rows[rowIndex - 1] || null);
-    document.getElementById("rowIndex").value = "";
-    document.getElementById("siteNameInsert").value = "";
-}
-
-function deleteRow(button) {
-    const row = button.closest("tr");
-    row.remove();
-}
-
-function autoFillRangeRandom() {
-    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
-    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
-    const value = document.getElementById('autoFillValue').value.trim() || "";
-    const color = document.getElementById('autoFillColor').value.trim() || "#ffffff";
-    const numRowsToProcess = parseInt(document.getElementById('numRows').value, 10) || 0;
-
-    if (!startColumnHeader || !endColumnHeader) {
-        alert("Please enter all required values.");
-        return;
-    }
-
-    // Find column indexes based on column headers
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let startColumnIndex = -1;
-    let endColumnIndex = -1;
-
-    headerCells.forEach((headerCell, index) => {
-        const headerText = headerCell.textContent.trim();
-        if (headerText === startColumnHeader) {
-            startColumnIndex = index;
-        }
-        if (headerText === endColumnHeader) {
-            endColumnIndex = index;
-        }
-    });
-
-    if (startColumnIndex === -1 || endColumnIndex === -1) {
-        alert("Column headers not found.");
-        return;
-    }
-
-    // Function to find a consistent sub-cell index across all columns in the range
-    function findConsistentSubCellIndex(cells, startIndex, endIndex) {
-        let fillSubCellIndex = -1;
-        for (let i = startIndex; i <= endIndex; i++) {
-            if (i >= cells.length) continue;
-            const cell = cells[i];
-            const subCells = cell.querySelectorAll('.sub-cell');
-
-            if (subCells.length === 0) return -1; // No sub-cells to consider
-
-            for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
-                const subCell = subCells[subIndex];
-                const cellText = subCell.textContent.trim();
-                
-                // Find the first valid index where the sub-cell is empty or contains "Available"
-                if (cellText === "" || cellText === "Available") {
-                    if (fillSubCellIndex === -1) {
-                        fillSubCellIndex = subIndex; // Set index if it's the first valid index found
-                    } else if (subIndex !== fillSubCellIndex) {
-                        return -1; // Inconsistent sub-cell index
-                    }
-                    break; // Found a valid sub-cell index
-                }
-            }
-        }
-        return fillSubCellIndex;
-    }
-
-    // Process rows
-    const rows = Array.from(document.querySelectorAll("#dataTable tbody tr"));
-    let numProcessed = 0;
-    let processedAny = false; // Track if we processed any row
-
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        const row = rows[rowIndex];
-        const cells = row.querySelectorAll("td");
-
-        // Determine the consistent sub-cell index
-        const consistentSubCellIndex = findConsistentSubCellIndex(cells, startColumnIndex, endColumnIndex);
-
-        if (consistentSubCellIndex === -1) {
-            continue; // Skip rows if no consistent sub-cell index is found
-        }
-
-        // Check if all sub-cells in the specified columns are "Available"
-        let allSubCellsAvailable = true;
-        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-            if (i >= cells.length) continue;
-            const cell = cells[i];
-            const subCells = cell.querySelectorAll('.sub-cell');
-
-            if (consistentSubCellIndex >= subCells.length) {
-                allSubCellsAvailable = false;
-                break; // Skip if sub-cell index is out of range for any column
-            }
-
-            const subCell = subCells[consistentSubCellIndex];
-            if (subCell.textContent.trim() !== "Available") {
-                allSubCellsAvailable = false;
-                break; // Skip if any sub-cell in the range is not "Available"
-            }
-        }
-
-        // Only update rows if all sub-cells in the specified columns are "Available"
-        if (allSubCellsAvailable) {
-            cells.forEach((cell, index) => {
-                if (index >= startColumnIndex && index <= endColumnIndex) {
-                    const subCells = cell.querySelectorAll('.sub-cell');
-                    if (consistentSubCellIndex < subCells.length) {
-                        const subCell = subCells[consistentSubCellIndex];
-                        if (subCell.textContent.trim() === "" || subCell.textContent.trim() === "Available") {
-                            subCell.textContent = value;
-                            subCell.style.backgroundColor = color;
-                        }
-                    }
-                }
-            });
-
-            numProcessed++;
-            processedAny = true; // Mark that at least one row has been processed
-
-            if (numProcessed >= numRowsToProcess) {
-                break; // Stop processing if we've reached the desired number of rows
-            }
-        }
-    }
-
-    // Alert if the number of processed rows is less than the specified number
-    if (processedAny && numProcessed < numRowsToProcess) {
-        alert("Alert - not enough sites");
-    }
-}
-
-function autoFillRange() {
-    const rowHeaders = Array.from(document.getElementById('rowHeader').selectedOptions)
-                            .map(option => option.value.trim());
-    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
-    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
-    const value = document.getElementById('autoFillValue').value || "";
-    const color = document.getElementById('autoFillColor').value || "#ffffff";
-
-    if (rowHeaders.length === 0 || !startColumnHeader || !endColumnHeader) {
-        alert("Please select at least one row header and enter all required values.");
-        return;
-    }
-
-    // Find column indexes based on column headers
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let startColumnIndex = -1;
-    let endColumnIndex = -1;
-
-    headerCells.forEach((headerCell, index) => {
-        const headerText = headerCell.textContent.trim();
-        if (headerText === startColumnHeader) {
-            startColumnIndex = index;
-        }
-        if (headerText === endColumnHeader) {
-            endColumnIndex = index;
-        }
-    });
-
-    if (startColumnIndex === -1 || endColumnIndex === -1) {
-        alert("Column headers not found.");
-        return;
-    }
-
-    // Process each selected rowHeader
-    rowHeaders.forEach(rowHeader => {
-        // Find the target row based on rowHeader
-        const rows = document.querySelectorAll("#dataTable tbody tr");
-        let targetRow = null;
-
-        rows.forEach(row => {
-            // Skip rows with the class 'single-row'
-            if (row.classList.contains('single-row')) {
-                return;
-            }
-
-            const cells = row.querySelectorAll("td");
-            const rowHeaderCell = cells[0];
-            if (rowHeaderCell.textContent.trim() === rowHeader) {
-                targetRow = row;
-            }
-        });
-
-        if (!targetRow) {
-            alert(`Row header "${rowHeader}" not found.`);
-            return;
-        }
-
-        // Determine the consistent sub-cell index across all specified columns
-        let fillSubCellIndex = -1;
-        const cells = targetRow.querySelectorAll("td");
-
-        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-            if (i < cells.length) {
-                const cell = cells[i];
-                const subCells = cell.querySelectorAll('.sub-cell');
-
-                if (subCells.length === 0) {
-                    fillSubCellIndex = -1;
-                    break; // No sub-cells in this column, cannot determine index
-                }
-
-                let columnSubCellIndex = -1;
-
-                for (let subIndex = 0; subIndex < subCells.length; subIndex++) {
-                    const subCell = subCells[subIndex];
-                    const cellText = subCell.textContent.trim();
-
-                    // Find the first valid index where the sub-cell is empty or contains "Available"
-                    if (cellText === "" || cellText === "Available") {
-                        columnSubCellIndex = subIndex;
-                        break; // Found a valid sub-cell index
-                    }
-                }
-
-                if (columnSubCellIndex === -1) {
-                    fillSubCellIndex = -1;
-                    break; // No valid sub-cell index found
-                }
-
-                if (fillSubCellIndex === -1) {
-                    fillSubCellIndex = columnSubCellIndex; // Set index if it's the first valid index found
-                } else if (fillSubCellIndex !== columnSubCellIndex) {
-                    fillSubCellIndex = -1;
-                    break; // Inconsistent sub-cell index
-                }
-            }
-        }
-
-        // If a consistent sub-cell index was found, check if all sub-cells in the specified range are "Available"
-        if (fillSubCellIndex !== -1) {
-            let allAvailable = true;
-
-            for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-                if (i >= cells.length) continue;
-                const cell = cells[i];
-                const subCells = cell.querySelectorAll('.sub-cell');
-
-                if (fillSubCellIndex >= subCells.length) {
-                    allAvailable = false;
-                    break; // Sub-cell index is out of range for this column
-                }
-
-                const subCell = subCells[fillSubCellIndex];
-                if (subCell.textContent.trim() !== "Available") {
-                    allAvailable = false;
-                    break; // At least one sub-cell is not "Available"
-                }
-            }
-
-            // Only update cells if all sub-cells at the same index are "Available"
-            if (allAvailable) {
-                cells.forEach((cell, index) => {
-                    if (index >= startColumnIndex && index <= endColumnIndex) {
-                        const subCells = cell.querySelectorAll('.sub-cell');
-                        if (fillSubCellIndex < subCells.length) {
-                            const subCell = subCells[fillSubCellIndex];
-                            if (subCell.textContent.trim() === "" || subCell.textContent.trim() === "Available") {
-                                subCell.textContent = value;
-                                subCell.style.backgroundColor = color;
-                            }
-                        }
-                    }
-                });
-            } else {
-                alert(`Not all sub-cells in the specified range for row header "${rowHeader}" have the value 'Available'.`);
-            }
-        } else {
-            alert(`No consistent sub-cell index found across the specified range for row header "${rowHeader}".`);
-        }
-    });
-}
-
-function getSelectedRowHeaders() {
-    const rowHeaderSelect = document.getElementById('rowHeader');
-    const selectedOptions = Array.from(rowHeaderSelect.selectedOptions);
-    return selectedOptions.map(option => option.value);
-}
-
-    function searchTable() {
-        const searchHeader = document.getElementById('searchHeader').value.toLowerCase();
-        const rows = document.querySelectorAll("#dataTable tbody tr");
-
-        rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        const rowHeaderCell = cells[0].textContent.toLowerCase();
-
-        let showRow = false;
-
-        // Check if row header contains the search term
-        if (rowHeaderCell.includes(searchHeader)) {
-            showRow = true;
-        } else {
-            // Check the content of all cells if row header does not match
-            cells.forEach(cell => {
-                const subCells = cell.querySelectorAll('.sub-cell');
-                let cellContainsValue = false;
-
-                // Check sub-cells if present
-                if (subCells.length > 0) {
-                    subCells.forEach(subCell => {
-                        if (subCell.textContent.toLowerCase().includes(searchHeader)) {
-                            cellContainsValue = true;
-                        }
-                    });
-                } else {
-                    // Check cell content if no sub-cells
-                    if (cell.textContent.toLowerCase().includes(searchHeader)) {
-                        cellContainsValue = true;
-                    }
-                }
-
-                if (cellContainsValue) {
-                    showRow = true;
-                }
-            });
-        }
-
-        row.style.display = showRow ? "" : "none";
-       });
-    }
-
-    function searchInRange() {
-    const startColumnHeader = document.getElementById('startColumnHeader').value.trim();
-    const endColumnHeader = document.getElementById('endColumnHeader').value.trim();
-    const searchValue = "Available"; // Constant search value
-
-    if (!startColumnHeader || !endColumnHeader) {
-        alert("Please enter all required column headers.");
-        return;
-    }
-
-    // Find column indexes based on column headers
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let startColumnIndex = -1;
-    let endColumnIndex = -1;
-
-    headerCells.forEach((headerCell, index) => {
-        const headerText = headerCell.textContent.trim();
-        if (headerText === startColumnHeader) {
-            startColumnIndex = index;
-        }
-        if (headerText === endColumnHeader) {
-            endColumnIndex = index;
-        }
-    });
-
-    if (startColumnIndex === -1 || endColumnIndex === -1) {
-        alert("Column headers not found.");
-        return;
-    }
-
-    // Search for rows where all cells in the specified range contain the search value
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        let allMatch = true;
-
-        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-            if (i < cells.length) {
-                const cell = cells[i];
-                const subCells = cell.querySelectorAll('.sub-cell');
-
-                // Check if all sub-cells contain the constant search value
-                let cellContainsValue = false;
-                subCells.forEach(subCell => {
-                    if (subCell.textContent.trim() === searchValue) {
-                        cellContainsValue = true;
-                    }
-                });
-
-                if (!cellContainsValue) {
-                    allMatch = false;
-                    break;
-                }
-            }
-        }
-
-        // Show or hide rows based on whether all cells in the range contain the value
-        row.style.display = allMatch ? "" : "none";
-    });
-}
-
-    function searchInRangeReplace() {
-    // Get input values
-    const startColumnHeader = document.getElementById('startColumnHeader');
-    const endColumnHeader = document.getElementById('endColumnHeader');
-    const newValue = document.getElementById('autoFillValue');
-    const newColor = document.getElementById('autoFillColor');
-
-    // Validate if elements exist
-    if (!startColumnHeader || !endColumnHeader || !newValue) {
-        console.error("Required input elements are missing.");
-        return;
-    }
-
-    const startColumnHeaderValue = startColumnHeader.value.trim();
-    const endColumnHeaderValue = endColumnHeader.value.trim();
-    const newValueText = newValue.value.trim();
-    const newColorValue = newColor ? newColor.value.trim() : "#ffffff";
-
-    // Validate input values
-    if (!startColumnHeaderValue || !endColumnHeaderValue) {
-        alert("Please enter both start and end column headers.");
-        return;
-    }
-    if (!newValueText) {
-        alert("Please enter a new value.");
-        return;
-    }
-
-    // Find column indexes based on column headers
-    const headerCells = document.querySelectorAll("#headerRow th");
-    let startColumnIndex = -1;
-    let endColumnIndex = -1;
-
-    headerCells.forEach((headerCell, index) => {
-        const headerText = headerCell.textContent.trim();
-        if (headerText === startColumnHeaderValue) {
-            startColumnIndex = index;
-        }
-        if (headerText === endColumnHeaderValue) {
-            endColumnIndex = index;
-        }
-    });
-
-    if (startColumnIndex === -1 || endColumnIndex === -1) {
-        alert("Start or end column header not found.");
-        return;
-    }
-
-    // Process each row
-    const rows = document.querySelectorAll("#dataTable tbody tr");
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-
-        // Array to store the indices of "Available" sub-cells
-        let availableIndices = [];
-
-        for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-            if (i < cells.length) {
-                const cell = cells[i];
-                const subCells = cell.querySelectorAll('.sub-cell');
-
-                // Find index of "Available" in sub-cells of this cell
-                let foundIndex = -1;
-                subCells.forEach((subCell, index) => {
-                    if (subCell.textContent.trim() === "Available") {
-                        if (foundIndex === -1) {
-                            foundIndex = index; // Set index of the first "Available" found
-                        }
-                    }
-                });
-
-                // If the index was found in this cell, add it to availableIndices
-                if (foundIndex !== -1) {
-                    availableIndices.push(foundIndex);
-                } else {
-                    // If any column does not have "Available" at the same index, break
-                    availableIndices = [];
-                    break;
-                }
-            }
-        }
-
-        // Replace values if all columns within the range had "Available" at the same index
-        if (availableIndices.length === (endColumnIndex - startColumnIndex + 1)) {
-            const replaceIndex = availableIndices[0]; // Use the first index where "Available" was found
-
-            for (let i = startColumnIndex; i <= endColumnIndex; i++) {
-                if (i < cells.length) {
-                    const cell = cells[i];
-                    const subCells = cell.querySelectorAll('.sub-cell');
-
-                    // Ensure that the replaceIndex is within the range of subCells
-                    if (replaceIndex < subCells.length) {
-                        const subCell = subCells[replaceIndex];
-                        subCell.textContent = newValueText;
-                        if (newColorValue) {
-                            subCell.style.backgroundColor = newColorValue;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-    // Generate the initial headers when the page loads
-    document.addEventListener("DOMContentLoaded", generateDateHeaders);
-    
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
