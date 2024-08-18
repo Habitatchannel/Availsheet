@@ -1,13 +1,3 @@
-function updateSerialNumbers() {
-  const rows = document.querySelectorAll('#dataTable tbody tr');
-  rows.forEach((row, index) => {
-      const snoCell = row.querySelector('td.sno');
-      if (snoCell) {
-          snoCell.textContent = index + 1; // Set the serial number
-      }
-  });
-}
-
 function saveTableState() {
     const tableHTML = document.querySelector('#dataTable').outerHTML;
     localStorage.setItem('tableState', tableHTML);
@@ -20,8 +10,8 @@ function saveTableState() {
                 notification.classList.remove('show');
             }, 2000);
 }
-// Call saveTableState every 100 seconds (100000 milliseconds)
-setInterval(saveTableState, 100000);
+// Call saveTableState every 600 seconds (600000 milliseconds)
+setInterval(saveTableState, 600000);
 
 function loadTableState() {
     const savedTableHTML = localStorage.getItem('tableState');
@@ -102,8 +92,8 @@ function addSplitRow() {
   const rowIndex = parseInt(document.getElementById('rowIndexSplit').value.trim(), 10);
 
   if (!siteName) {
-      alert("Please enter a Site Name.");
-      return;
+    alert("Please enter a Site Name.");
+    return;
   }
 
   // Add the new siteName to the multiselect dropdown
@@ -113,18 +103,25 @@ function addSplitRow() {
   option.textContent = siteName;
   rowHeaderSelect.appendChild(option);
 
+  // Update serial numbers
+  updateSerialNumbers();
+
+  // Save the row headers to localStorage
+  saveRowHeaders();
+
   // Prepare the tags
   let tags = tagsSelect.value;
   if (addLandscapeTag) {
-      if (tags) {
-          tags += `, Landscape`;
-      } else {
-          tags = 'Landscape';
-      }
+    if (tags) {
+      tags += `, Landscape`;
+    } else {
+      tags = 'Landscape';
+    }
   }
 
   const tableBody = document.querySelector("#dataTable tbody");
   const newRow = document.createElement("tr");
+
 
   // Add Sno column
   const snoCell = document.createElement("td");
@@ -142,21 +139,21 @@ function addSplitRow() {
   // Add 365 columns with 6 sub-cells each
   const numOfDays = 365;
   for (let i = 0; i < numOfDays; i++) {
-      const cellContainer = document.createElement('div');
-      cellContainer.className = 'cell-container';
+    const cellContainer = document.createElement('div');
+    cellContainer.className = 'cell-container';
 
-      for (let j = 0; j < 6; j++) {
-          const subCell = document.createElement('div');
-          subCell.className = 'sub-cell editable';
-          subCell.setAttribute('contenteditable', 'true');
-          subCell.textContent = "Available"; // Default value
-          subCell.style.backgroundColor = "rgb(0, 240, 0)"; // Default color
-          cellContainer.appendChild(subCell);
-      }
+    for (let j = 0; j < 6; j++) {
+      const subCell = document.createElement('div');
+      subCell.className = 'sub-cell editable';
+      subCell.setAttribute('contenteditable', 'true');
+      subCell.textContent = "Available"; // Default value
+      subCell.style.backgroundColor = "rgb(0, 240, 0)"; // Default color
+      cellContainer.appendChild(subCell);
+    }
 
-      const cell = document.createElement("td");
-      cell.appendChild(cellContainer);
-      newRow.appendChild(cell);
+    const cell = document.createElement("td");
+    cell.appendChild(cellContainer);
+    newRow.appendChild(cell);
   }
 
   // Add Tags cell with tooltip
@@ -174,29 +171,86 @@ function addSplitRow() {
   // Insert or append the new row
   const rows = tableBody.querySelectorAll('tr');
   if (isNaN(rowIndex) || rowIndex < 1 || rowIndex > rows.length + 1) {
-      tableBody.appendChild(newRow); // Append if index is invalid or out of range
+    tableBody.appendChild(newRow); // Append if index is invalid or out of range
   } else {
-      const index = rowIndex - 1; // Convert to 0-based index
-      if (index < rows.length) {
-          tableBody.insertBefore(newRow, rows[index]);
-      } else {
-          tableBody.appendChild(newRow); // Append if index is at the end
-      }
+    const index = rowIndex - 1; // Convert to 0-based index
+    if (index < rows.length) {
+      tableBody.insertBefore(newRow, rows[index]);
+    } else {
+      tableBody.appendChild(newRow); // Append if index is at the end
+    }
   }
 
   document.getElementById("siteNameSplit").value = "";
   tagsSelect.value = ""; // Clear the tags selection
   document.getElementById("addLandscapeTag").checked = false; // Reset the checkbox
   document.getElementById("rowIndexSplit").value = ""; // Reset the row index input
+  // Call updateSerialNumbers on page load to ensure serial numbers are correct
+  document.addEventListener('DOMContentLoaded', updateSerialNumbers);
 
-  // Update serial numbers
-  updateSerialNumbers();
+  if (saveRowHeaders) {
+    alert("New Site created");
+    return;
+  }
+
+}
+
+// Function to delete selected row header
+function deleteRowHeader() {
+  const rowHeaderSelect = document.getElementById('rowHeader');
+  const selectedOption = rowHeaderSelect.options[rowHeaderSelect.selectedIndex];
+  
+  if (!selectedOption) {
+    alert("Please select site name to delete.");
+    return;
+  }
+
+  // Remove the selected option
+  rowHeaderSelect.removeChild(selectedOption);
+
+  // Save the updated row headers to localStorage
+  saveRowHeaders();
+}
+
+// Function to save row headers to localStorage
+function saveRowHeaders() {
+  const rowHeaderSelect = document.getElementById('rowHeader');
+  const options = rowHeaderSelect.querySelectorAll('option');
+  const headers = Array.from(options).map(option => option.value);
+  localStorage.setItem('rowHeaders', JSON.stringify(headers));
+  
+}
+
+// Function to load row headers from localStorage
+function loadRowHeaders() {
+  const headers = JSON.parse(localStorage.getItem('rowHeaders')) || [];
+  const rowHeaderSelect = document.getElementById('rowHeader');
+  headers.forEach(header => {
+    const option = document.createElement('option');
+    option.value = header;
+    option.textContent = header;
+    rowHeaderSelect.appendChild(option);
+  });
+}
+
+// Load row headers when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  loadRowHeaders();
+});
+
+
+// Function to update serial numbers for all rows
+function updateSerialNumbers() {
+  const rows = document.querySelectorAll('#dataTable tbody tr');
+  rows.forEach((row, index) => {
+      const snoCell = row.querySelector('td.sno');
+      if (snoCell) {
+          snoCell.textContent = index + 1; // Set the serial number
+      }
+  });
 }
 
 
-
-// Call updateSerialNumbers on page load to ensure serial numbers are correct
-document.addEventListener('DOMContentLoaded', updateSerialNumbers);
 
 
 
@@ -244,6 +298,11 @@ function addSingleRow() {
 
     // Clear the input field
     document.getElementById("siteNameSingle").value = "";
+
+    if (addSingleRow) {
+      alert("New State Created");
+      return;
+    }
 }
 
 function deleteRow(button) {
@@ -388,8 +447,11 @@ function autoFillRangeRandom() {
 
   // Alert if the number of processed rows is less than the specified number
   if (processedAny && numProcessed < numRowsToProcess) {
-      alert("Alert - not enough rows processed.");
+      alert("Not enough sites ");
   }
+  if (processedAny && numProcessed == numRowsToProcess) {
+    alert("Provided no.of sites filled");
+}
 }
 
 
@@ -402,7 +464,7 @@ function autoFillRange() {
     const color = document.getElementById('autoFillColor').value || "#ffffff";
 
     if (rowHeaders.length === 0 || !startColumnHeader || !endColumnHeader) {
-        alert("Please select at least one row header and enter all required values.");
+        alert("Please select atleast one site");
         return;
     }
 
@@ -533,6 +595,9 @@ function autoFillRange() {
             alert(`No consistent sub-cell index found across the specified range for row header "${rowHeader}".`);
         }
     });
+    if (autoFillRange) {
+      alert("Slected sites are filled");
+  }
 }
 
 function getSelectedRowHeaders() {
@@ -772,6 +837,9 @@ function searchInRangeReplace() {
           }
       }
   });
+  if (searchInRangeReplace) {
+    alert("Available sites are filled");
+}
 }
 function exportTableToExcel(filename = 'Avails report.xlsx') {
         // Get the table element
@@ -794,6 +862,10 @@ function exportTableToExcel(filename = 'Avails report.xlsx') {
         
         // Clean up
         URL.revokeObjectURL(link.href);
+
+        if (exportTableToExcel) {
+          alert("File Downloaded !");
+      }
     }
     
     // Generate the initial headers when the page loads
