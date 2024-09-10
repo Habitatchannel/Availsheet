@@ -181,7 +181,8 @@
             <div class="form-group mb-2">
                 <input type="number" id="rowIndexSplit" class="form-control" placeholder="Enter Row number to Insert the site" min="1">
             </div>
-    
+          
+           
             <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Site</button>
 
         </form>
@@ -189,19 +190,10 @@
     <input type="file" id="csvFileInput" accept=".csv">
     <button onclick="uploadCSV()">Upload CSV</button>
     <!-- Form to Add Rows without Split Cells -->
-    <div class="form-container">
-        <h3>Add New State</h3>
-        <form id="addSingleRowForm" class="d-flex flex-wrap">
-            <div class="form-group mb-2">
-                <input type="text" id="siteNameSingle" class="form-control" placeholder="State Name" required>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="addSingleRow()">Add State</button>
-        </form>
-    </div>
 
     <div class="form-container">
-        <h3 class="form-group mb-2">Fill Options</h3>
         <form id="autoFillRangeForm" class="d-flex flex-wrap">
+           <h3 class="form-group mb-2">Fill Options</h3>
             <div class="form-group mb-2">
                 <label for="rowHeader" class="form-label">Site Name:</label>
                 <input type="text" id="rowHeader" class="form-control" placeholder="Enter Site Name" required>
@@ -246,7 +238,6 @@
             <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill chosen Site</button>
             <button type="button" class="btn btn-danger" onclick="searchInRangeReplace()">Replace All sites</button>
             <button type="button" class="btn btn-info" onclick="searchInRange()">Search</button>
-            <button type="button" class="btn btn-info" onclick="createTableFromInputs()">Campaign save</button>
         </form>
     </div>
 
@@ -272,21 +263,26 @@
         <button type="button" class="btn btn-success" onclick="exportTableToExcel()">Export as Excel</button>
     </div>
     <!-- Table Structure -->
-    <table id="dataTable" class="table table-bordered">
-        <thead>
-            <tr id="headerRow">
-                <th class="header-cell">Sno</th> <!-- Added Serial Number Header -->
-                <th class="header-cell ">Tags</th> 
-                <th class="header-cell first-column-header">Site Name</th>
+<table id="dataTable" class="table table-bordered">
+    <thead>
+        <tr id="headerRow">
+            <th class="header-cell first-column-header">Sno</th>
+            <th class="header-cell first-column-header">Site Name</th>
+            <!-- Date headers will be added here -->
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <!-- Rows will be added here -->
+    </tbody>
+</table>
 
-                <!-- Date headers will be added here -->
-                 
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be added here -->
-        </tbody>
-    </table>
+<!-- Pagination Controls -->
+<div id="paginationControls" class="d-flex justify-content-center mt-3">
+    <button id="prevPage" class="btn btn-primary" onclick="changePage(-1)">Previous</button>
+    <span id="pageInfo" class="mx-3"></span>
+    <button id="nextPage" class="btn btn-primary" onclick="changePage(1)">Next</button>
+</div>
+
 </div>
 <!-- Bootstrap JavaScript Bundle with Popper -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
