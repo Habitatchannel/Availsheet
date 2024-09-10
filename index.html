@@ -6,7 +6,14 @@
     <title>Avails Sheet</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
@@ -124,6 +131,21 @@
             left: 0;
             z-index: 1; /* Ensures it sits above other cells */
         }
+     /* CSS for fixed positioning */
+.form-container {
+    margin-bottom: 30px;
+}
+
+#autoFillRangeForm {
+    position: fixed;
+    top: 10px; /* Distance from the top of the viewport */
+    right: 10px; /* Distance from the right of the viewport */
+    width: 300px; /* Adjust width as needed */
+    background-color: #fff; /* Ensure form has a background */
+    z-index: 1000; /* Ensure it sits above other content */
+    padding: 15px; /* Optional: add some padding for better appearance */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: add shadow for better visibility */
+}
     </style>
 </head>
 <body>
@@ -139,7 +161,7 @@
                 <input type="text" id="siteNameSplit" class="form-control" placeholder="New Site Name" required>
             </div>
             <div class="form-group mb-2">
-                <label for="startColumnHeader" class="form-label">Choose State</label>
+                <label for="rowTags" class="form-label">Choose State</label>
                 <select id="rowTags" class="form-control">
                    <option value="">Select State</option>
                    <option value="NSW">NSW</option>
@@ -149,7 +171,7 @@
                    <option value="SA">SA</option>
                    <option value="WA">WA</option>
                    <option value="NT">NT</option>
-                     <!-- Add more options as needed -->
+                    <!-- Add more options as needed -->
                 </select>
             </div>
             <div class="form-check mt-2">
@@ -157,12 +179,15 @@
                 <label class="form-check-label" for="addLandscapeTag">Landscape</label>
             </div>
             <div class="form-group mb-2">
-                <input type="number" id="rowIndexSplit" class="form-control" placeholder="Enter Row number to Insert the site " min="1">
+                <input type="number" id="rowIndexSplit" class="form-control" placeholder="Enter Row number to Insert the site" min="1">
             </div>
+    
             <button type="button" class="btn btn-primary" onclick="addSplitRow()">Add Site</button>
+
         </form>
     </div>
-
+    <input type="file" id="csvFileInput" accept=".csv">
+    <button onclick="uploadCSV()">Upload CSV</button>
     <!-- Form to Add Rows without Split Cells -->
     <div class="form-container">
         <h3>Add New State</h3>
@@ -174,21 +199,14 @@
         </form>
     </div>
 
-    <!-- Form to Auto Fill Range of Sub-Cells in a Specific Row -->
     <div class="form-container">
-        <h3>Fill Campaigns on Avails </h3>
+        <h3 class="form-group mb-2">Fill Options</h3>
         <form id="autoFillRangeForm" class="d-flex flex-wrap">
             <div class="form-group mb-2">
                 <label for="rowHeader" class="form-label">Site Name:</label>
-                <select id="rowHeader" class="form-control" multiple>
-                    <!-- Options will be populated dynamically -->
-                </select>
+                <input type="text" id="rowHeader" class="form-control" placeholder="Enter Site Name" required>
             </div>
-            <div>
-                <!-- Add this button to your HTML -->
-                <button id="deleteHeaderButton" onclick="deleteRowHeader()">Delete Site name from list </button>
-
-            </div>
+        
             <div class="form-group mb-2">
                 <label for="startColumnHeader" class="form-label">Campaign Start Date:</label>
                 <select id="startColumnHeader" class="form-control">
@@ -202,21 +220,21 @@
                 </select>
             </div>
             <div class="form-group mb-2">
-                <label for="autoFillValue" class="form-label">Campaign Name: </label>
+                <label for="autoFillValue" class="form-label">Campaign Name:</label>
                 <input type="text" id="autoFillValue" class="form-control" placeholder="Campaign Name" required>
             </div>
             <div class="form-group mb-2">
-               <label for="autoFillColor" class="form-label">Select Colour </label>
-                <input type="color" id="autoFillColor" class="form-control" placeholder="Slect colour" required>
+                <label for="autoFillColor" class="form-label">Select Colour:</label>
+                <input type="color" id="autoFillColor" class="form-control" required>
             </div>
             <div class="form-group mb-2">
-                <label for="numRows" class="form-label">Number of Sites</label>
+                <label for="numRows" class="form-label">Number of Sites:</label>
                 <input type="text" id="numRows" name="numRows" class="form-control">
             </div>
             <div>
                 <label for="tagReferenceSelect">Select state (optional):</label>
                 <select id="tagReferenceSelect">
-                    <option value="">-- Select State--</option>
+                    <option value="">-- Select State --</option>
                     <option value="NSW">NSW</option>
                     <option value="VIC">VIC</option>
                     <option value="QLD">QLD</option>
@@ -225,12 +243,12 @@
                 </select>
             </div>
             <button type="button" class="btn btn-secondary" onclick="autoFillRangeRandom()">Fill Random</button>
-            <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill choosen Site</button>
+            <button type="button" class="btn btn-primary" onclick="autoFillRange()">Fill chosen Site</button>
             <button type="button" class="btn btn-danger" onclick="searchInRangeReplace()">Replace All sites</button>
             <button type="button" class="btn btn-info" onclick="searchInRange()">Search</button>
+            <button type="button" class="btn btn-info" onclick="createTableFromInputs()">Campaign save</button>
         </form>
     </div>
-
 
     <!-- Form to Search for Rows or Cells -->
     <div class="form-container">
@@ -270,9 +288,6 @@
         </tbody>
     </table>
 </div>
-
-
-
 <!-- Bootstrap JavaScript Bundle with Popper -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
