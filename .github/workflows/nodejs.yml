@@ -1,4 +1,4 @@
-name: Node.js Express Server
+name: Node.js CI
 
 on:
   push:
@@ -14,20 +14,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Ensure you are using the latest version
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Ensure you are using the latest version
+        uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Explicitly specify Node.js version 20
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run server
-        run: npm start
-        env:
-          APP_TOKEN: ${{ secrets.APP_TOKEN }}
-
-      - name: Run additional script (Optional)
-        run: npm test  # This runs `node script.js`
+      - name: Run tests
+        run: npm test
