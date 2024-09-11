@@ -8,8 +8,8 @@ const app = express();
 const port = 3000;
 
 // Middleware to parse JSON bodies with a reasonable size limit
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
 // In-memory storage for table state
 let tableState = '';
