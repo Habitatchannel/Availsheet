@@ -15,6 +15,6 @@
   },
   "devDependencies": {},
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=16" // Specify the minimum version of Node.js. Use "node" for the latest version
   }
 }
