@@ -1,18 +1,23 @@
 function saveTableState() {
-    const tableHTML = document.querySelector('#dataTable').outerHTML;
+    const tableData = { // Construct an object to hold table data
+        tableHTML: document.querySelector('#dataTable').outerHTML
+    };
+    
     fetch('/saveTableState', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ tableHTML })
+        body: JSON.stringify(tableData)
     })
     .then(response => response.text())
     .then(message => {
         console.log(message); // Log or handle the server response
+        
         // Show the custom notification
         const notification = document.getElementById('notification');
         notification.classList.add('show');
+        
         // Hide the notification after 2 seconds
         setTimeout(() => {
             notification.classList.remove('show');
@@ -21,7 +26,6 @@ function saveTableState() {
     .catch(error => console.error('Error:', error));
 }
 
-
 function loadTableState() {
     fetch('/loadTableState')
         .then(response => response.json())
@@ -29,11 +33,16 @@ function loadTableState() {
             const savedTableHTML = data.tableHTML;
             if (savedTableHTML) {
                 const dataTable = document.querySelector('#dataTable');
-                dataTable.outerHTML = savedTableHTML;
-                updateDynamicOptions(); // To re-populate any dynamic options
-                alert('Table loading, please wait.');
+                if (dataTable) {
+                    dataTable.outerHTML = savedTableHTML;
+                    // Re-initialize event listeners or dynamic options if needed
+                    updateDynamicOptions(); // Ensure this function is defined elsewhere in your code
+                    alert('Table loading, please wait.');
+                } else {
+                    console.warn('No table element found to update.');
+                }
             } else {
-                alert('No table found.');
+                alert('No table data found.');
             }
         })
         .catch(error => console.error('Error:', error));
