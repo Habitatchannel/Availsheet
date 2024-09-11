@@ -3,22 +3,23 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
 const port = 3000;
 
 // Middleware to parse JSON bodies with a reasonable size limit
-app.use(bodyParser.json({ limit: '100mb' }));
-app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // In-memory storage for table state
 let tableState = '';
 
-// GitHub repository details
-const GITHUB_TOKEN = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
-const REPO_OWNER = 'your-username';
-const REPO_NAME = 'your-repo';
-const FILE_PATH = 'data/tableState.json'; // Path in the repo where data will be saved
+// GitHub repository details from environment variables
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const REPO_OWNER = process.env.REPO_OWNER;
+const REPO_NAME = process.env.REPO_NAME;
+const FILE_PATH = process.env.FILE_PATH; // Path in the repo where data will be saved
 
 // Route to save table state
 app.post('/saveTableState', async (req, res) => {
