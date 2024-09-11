@@ -17,21 +17,10 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 'node'
+        node-version: 'node'  # Use the latest available Node.js version
 
     - name: Install dependencies
       run: npm install
 
     - name: Run tests
       run: npm test
-      continue-on-error: true  # This step will not stop the job if it fails
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build  # Deploy job will run after build job finishes regardless of the build job's outcome
-
-    steps:
-    - name: Deploy code
-      run: |
-        echo "Deploying code..."
-        # Add your deployment script here
