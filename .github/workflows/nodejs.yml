@@ -14,23 +14,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # Ensure you are using the latest version
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3  # Ensure you are using the latest version
         with:
-          node-version: '20' # Specify Node.js version explicitly
+          node-version: '20'  # Explicitly specify Node.js version 20
 
       - name: Install dependencies
         run: npm install
 
       - name: Run server
-        run: npm start # Ensure this is the command that starts your server
+        run: npm start
         env:
-          APP_TOKEN: ${{ secrets.APP_TOKEN }} # Access your GitHub secret
+          APP_TOKEN: ${{ secrets.APP_TOKEN }}
 
-      - name: Run tests (Optional)
-        run: npm test # Optional: Add tests if you have them
-
-      - name: Deploy (Optional)
-        run: npm run deploy # Optional: Add deploy script if needed
+      - name: Run additional script (Optional)
+        run: npm test  # This runs `node script.js`
