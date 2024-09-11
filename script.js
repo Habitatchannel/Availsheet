@@ -1,5 +1,5 @@
 function saveTableState() {
-    const tableData = { // Construct an object to hold table data
+    const tableData = { 
         tableHTML: document.querySelector('#dataTable').outerHTML
     };
     
@@ -10,46 +10,67 @@ function saveTableState() {
         },
         body: JSON.stringify(tableData)
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
     .then(message => {
-        console.log(message); // Log or handle the server response
+        console.log('Save successful:', message);
         
         // Show the custom notification
         const notification = document.getElementById('notification');
-        notification.classList.add('show');
-        
-        // Hide the notification after 2 seconds
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 2000);
+        if (notification) {
+            notification.classList.add('show');
+            
+            // Hide the notification after 2 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        } else {
+            console.warn('Notification element not found.');
+        }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error saving table state:', error));
 }
 
 function loadTableState() {
     fetch('/loadTableState')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const savedTableHTML = data.tableHTML;
             if (savedTableHTML) {
                 const dataTable = document.querySelector('#dataTable');
                 if (dataTable) {
                     dataTable.outerHTML = savedTableHTML;
+                    
                     // Re-initialize event listeners or dynamic options if needed
-                    updateDynamicOptions(); // Ensure this function is defined elsewhere in your code
+                    if (typeof updateDynamicOptions === 'function') {
+                        updateDynamicOptions();
+                    } else {
+                        console.warn('updateDynamicOptions function is not defined.');
+                    }
+                    
                     alert('Table loading, please wait.');
                 } else {
-                    console.warn('No table element found to update.');
+                    console.warn('Table element with ID #dataTable not found.');
                 }
             } else {
                 alert('No table data found.');
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error loading table state:', error));
 }
 
 // Load the table state on page load
 window.onload = loadTableState;
+
 
     function generateDateHeaders() {
     const headerRow = document.getElementById('headerRow');
