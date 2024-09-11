@@ -1,0 +1,36 @@
+name: Node.js Express Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Specify the Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run server
+        run: npm start # Ensure this is the command that starts your server
+        env:
+          APP_TOKEN: ${{ secrets.APP_TOKEN }} # Access your GitHub secret
+
+      - name: Run tests (Optional)
+        run: npm test # Optional: Add tests if you have them
+
+      - name: Deploy (Optional)
+        run: npm run deploy # Optional: Add deploy script if needed
